@@ -1,0 +1,385 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
+# ==========================================
+# 0. 网页全局设置
+# ==========================================
+st.set_page_config(
+    page_title="智汇何方：百年诺奖得主的跨国迁徙",
+    page_icon="🌍",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+
+# ==========================================
+# 1. 数据加载与核心清洗模块
+# ==========================================
+@st.cache_data
+def load_and_clean_data():
+    # 读取 CSV 文件
+    df = pd.read_csv("nobel-prize-winners.csv")
+
+    # 数据预处理
+    df['born_year'] = df['born'].astype(str).str[:4]
+    df['born_year'] = pd.to_numeric(df['born_year'], errors='coerce')
+    df['age'] = df['year'] - df['born_year']
+
+    # 填充缺失值
+    df['institutionCountry'] = df['institutionCountry'].fillna('无归属机构(如文学/和平奖)')
+    df['bornCountry_now'] = df['bornCountry_now'].fillna('Unknown')
+
+    return df
+
+
+df = load_and_clean_data()
+
+# ==========================================
+# 2. 侧边栏导航设计
+# ==========================================
+st.sidebar.title("🧭 导航菜单")
+page = st.sidebar.radio(
+    "页面选择",
+    ["板块一：全景诺奖 (宏观探索)", "板块二：历史切片 (微观分析)"]
+)
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 👨‍💻 战队信息\n**数字人文作业系统数据项目**\n\n以数据洞察历史，用技术重塑人文。")
+
+# ==========================================
+# 3. 页面一逻辑：全景诺奖 (宏观探索)
+# ==========================================
+if page == "板块一：全景诺奖 (宏观探索)":
+    st.title("🌍 全景诺奖：百年数据的多维探索")
+
+    tab1, tab2, tab3 = st.tabs(["📍 空间与迁徙", "📈 时间与学科趋势", "👥 得主群体画像"])
+
+    with tab1:
+        st.subheader("诺贝尔奖地域跨国迁移地图 (飞线流量图 - 高级交互版)")
+
+        # --- 1. 数据准备与人名聚合 (保留旧逻辑) ---
+        map_df = df[(df['bornCountry_now'] != 'Unknown') &
+                    (df['institutionCountry'] != '独立学者/文学和平奖') &
+                    (df['bornCountry_now'] != df['institutionCountry'])].copy()
+
+
+        def format_names_on_hover_map(names):
+            name_list = names.dropna().tolist()
+            lines = [", ".join(name_list[i:i + 4]) for i in range(0, len(name_list), 4)]
+            return "<br>".join(lines)
+
+
+        flow_data = map_df.groupby(['bornCountry_now', 'institutionCountry']).agg(
+            count=('name', 'count'),
+            names=('name', format_names_on_hover_map)
+        ).reset_index()
+
+        # 为了地图视觉清晰，只保留流量大于1的线路
+        flow_data = flow_data[flow_data['count'] > 1]
+
+        # --- 2. 坐标与颜色映射 (保留旧逻辑) ---
+        # 用于国家轮廓填充的国家代码 (ISO Alpha-3)
+        iso_map = {
+            'USA': 'USA', 'United Kingdom': 'GBR', 'Germany': 'DEU', 'France': 'FRA',
+            'Sweden': 'SWE', 'Switzerland': 'CHE', 'Japan': 'JPN', 'Canada': 'CAN',
+            'Russia': 'RUS', 'USSR (now Russia)': 'RUS', 'Netherlands': 'NLD', 'Italy': 'ITA',
+            'Austria': 'AUT', 'Denmark': 'DNK', 'Belgium': 'BEL', 'Norway': 'NOR',
+            'Australia': 'AUS', 'India': 'IND', 'Israel': 'ISR', 'China': 'CHN'
+        }
+
+        # 用于引出飞线的中心点经纬度数据
+        country_coords = {
+            'USA': [37.0902, -95.7129], 'United Kingdom': [55.3781, -3.4360],
+            'Germany': [51.1657, 10.4515], 'France': [46.2276, 2.2137],
+            'Sweden': [60.1282, 18.6435], 'Switzerland': [46.8182, 8.2275],
+            'Japan': [36.2048, 138.2529], 'Canada': [56.1304, -106.3468],
+            'Russia': [61.5240, 105.3188], 'USSR (now Russia)': [61.5240, 105.3188],
+            'Netherlands': [52.1326, 5.2913], 'Italy': [41.8719, 12.5674],
+            'Austria': [47.5162, 14.5501], 'Denmark': [56.2639, 9.5018],
+            'Belgium': [50.5039, 4.4699], 'Norway': [60.4720, 8.4689],
+            'Australia': [-25.2744, 133.7751], 'India': [20.5937, 78.9629],
+            'Israel': [31.0424, 34.8516], 'China': [35.8617, 104.1954]
+        }
+
+        involved_countries = list(set(flow_data['bornCountry_now']).union(set(flow_data['institutionCountry'])))
+        involved_countries = [c for c in involved_countries if c in iso_map and c in country_coords]
+
+        color_palette = px.colors.qualitative.Alphabet + px.colors.qualitative.Pastel
+        color_map = {country: color_palette[i % len(color_palette)] for i, country in enumerate(involved_countries)}
+
+        # === 3. 构建多层地图 (重构核心) ===
+        fig_map = go.Figure()
+
+        # --- A. 层 1：国家轮廓填充层 (Choropleth) ---
+        # 【修改点1】用颜色填充国家轮廓，使区分明确，且只映射涉及的国家
+        # --- A. 层 1：国家轮廓填充层 (Choropleth) ---
+        # 1. 生成基础的填充数据
+        fill_data_list = [
+            {'country': c, 'iso': iso_map[c], 'color': color_map[c]} for c in involved_countries
+        ]
+
+        # 【关键修改】：版图完整性补丁
+        # 如果涉及国家中包含中国，强制将台湾(TWN)、香港(HKG)、澳门(MAC)的色块与中国(CHN)绑定为同一颜色
+        if 'China' in involved_countries:
+            china_color = color_map['China']
+            fill_data_list.extend([
+                {'country': 'China', 'iso': 'TWN', 'color': china_color},
+                {'country': 'China', 'iso': 'HKG', 'color': china_color},
+                {'country': 'China', 'iso': 'MAC', 'color': china_color}
+            ])
+
+        fill_data = pd.DataFrame(fill_data_list)
+
+        fig_map.add_trace(go.Choropleth(
+            locations=fill_data['iso'],
+            z=list(range(len(fill_data))),
+            colorscale=[[i / (len(fill_data) - 1 if len(fill_data) > 1 else 1), fill_data.iloc[i]['color']] for i in
+                        range(len(fill_data))],
+            showscale=False,
+            hoverinfo='location+z',
+            marker=dict(line=dict(width=0.5, color='rgba(255,255,255,0.2)')),
+        ))
+
+        # 优化层1的 hover 显示
+        hovertemplate_choro = (
+            "<b>%{location}</b><br>"
+            "涉及诺奖数据国家/地区<extra></extra>"
+        )
+        fig_map.data[0].update(hovertemplate=hovertemplate_choro)
+
+        # --- B. 层 2：中心点散点 (不显示 marker，仅用于中心定位视觉提示) ---
+        # 为了视觉清晰，我们将 marker 设为透明
+        for country in involved_countries:
+            lat, lon = country_coords[country]
+            fig_map.add_trace(go.Scattergeo(
+                lon=[lon], lat=[lat],
+                mode='markers',
+                marker=dict(size=1, color='rgba(0,0,0,0)'),  # 透明
+                showlegend=False,
+                hoverinfo='none'
+            ))
+
+        # --- C. 层 3：飞线连线 (Lines) ---
+        for _, row in flow_data.iterrows():
+            born = row['bornCountry_now']
+            inst = row['institutionCountry']
+            count = row['count']
+
+            if born in country_coords and inst in country_coords:
+                lat1, lon1 = country_coords[born]
+                lat2, lon2 = country_coords[inst]
+
+                line_color = color_map[born]
+
+                # 绘制有弧度的“飞线”
+                fig_map.add_trace(go.Scattergeo(
+                    lon=[lon1, lon2], lat=[lat1, lat2],
+                    mode='lines',
+                    line=dict(
+                        width=min(count * 1.5, 15),  # 粗细代表人数
+                        color=line_color,
+                    ),
+                    opacity=0.4,  # 连线降低透明度，避免遮挡陆地颜色
+                    hoverinfo='none',  # 【修改点2】线本身不接受交互，将交互留给层4
+                    showlegend=False
+                ))
+
+        # --- D. 层 4：交互热区散点 (隐形成核心，实现悬浮名单) ---
+        # 【修改点3】在飞线的中点绘制透明散点，鼠标放在两个国家之间就会触发展示
+        for _, row in flow_data.iterrows():
+            born = row['bornCountry_now']
+            inst = row['institutionCountry']
+            count = row['count']
+
+            if born in country_coords and inst in country_coords:
+                lat1, lon1 = country_coords[born]
+                lat2, lon2 = country_coords[inst]
+
+                # 计算流量连线中点的经纬度
+                mid_lat = (lat1 + lat2) / 2
+                mid_lon = (lon1 + lon2) / 2
+
+                fig_map.add_trace(go.Scattergeo(
+                    lon=[mid_lon], lat=[mid_lat],
+                    mode='markers',
+                    marker=dict(
+                        size=25,  # 【关键点】 marker 足够大以覆盖交互区域
+                        color='rgba(0,0,0,0)',  # 完全透明，用户看不见
+                    ),
+                    hoverinfo='text',
+                    text=(
+                        f"<b>🌍 {born} ➔ {inst}</b><br>"
+                        f"迁移总人数: {count}人<br>"
+                        f"<br><b>具体名单:</b><br>{row['names']}"  # 悬浮展示具体名单
+                    ),
+                    showlegend=False
+                ))
+
+        # === 4. 地图布局样式优化 (暗黑风大屏质感) ===
+        fig_map.update_layout(
+            height=650,
+            margin=dict(l=0, r=0, t=10, b=0),
+            geo=dict(
+                # 使用立体球形投影，弧度更优美
+                projection_type='orthographic',
+                showland=True,
+                landcolor="#0E1117",  # 基础未填充陆地颜色（与背景融为一体）
+                countrycolor="rgba(255,255,255,0.05)",
+                showocean=True,
+                oceancolor="#0E1117",
+                bgcolor='rgba(0,0,0,0)',
+            ),
+            paper_bgcolor='rgba(0,0,0,0)',
+        )
+        st.plotly_chart(fig_map, use_container_width=True)
+
+        st.info(
+            "💡 **交互提示：** 地图通过Orthographic球形投影和Choropleth轮廓填充（多元配色）直观展示了诺奖地域迁移。你可以清晰区分涉及人才流动的主要国家。**你可以尝试将鼠标悬浮在任意两国的流量连线中间区域**，即可精准弹出具体的迁移人数与详细学者名单。")
+    with tab2:
+        st.subheader("百年科研重心的演进趋势")
+        # --- 堆叠面积图数据准备 ---
+        trend_df = df.groupby(['year', 'category']).size().reset_index(name='count')
+        all_years = pd.DataFrame({'year': range(df['year'].min(), df['year'].max() + 1)})
+        trend_df = pd.merge(all_years, trend_df, on='year', how='left').fillna({'count': 0})
+
+        fig_area = px.area(trend_df, x="year", y="count", color="category",
+                           title="历年各学科诺贝尔奖颁发数量",
+                           labels={"count": "获奖人数", "year": "年份", "category": "学科"},
+                           template="plotly_dark")
+        st.plotly_chart(fig_area, use_container_width=True)
+
+    with tab3:
+        st.subheader("得奖者的群体特征：年龄趋势与性别比例")
+
+        # 将页面分为左右两栏
+        col_age, col_gender = st.columns([6, 4])
+
+        with col_age:
+            # --- 散点图及趋势拟合线 ---
+            age_df = df.dropna(subset=['age', 'category'])
+            fig_scatter = px.scatter(age_df, x="year", y="age", color="category",
+                                     hover_data=['name', 'institutionCountry'],
+                                     opacity=0.7,
+                                     title="百年来诺奖得主获奖年龄分布",
+                                     labels={"age": "获奖时年龄", "year": "年份", "category": "学科"},
+                                     template="plotly_white")
+
+            avg_age_per_decade = age_df.groupby([age_df['year'] // 10 * 10, 'category'])['age'].mean().reset_index()
+            fig_scatter.add_traces(px.line(avg_age_per_decade, x="year", y="age", color="category").data)
+
+            for trace in fig_scatter.data:
+                if trace.mode == 'lines':
+                    trace.line.dash = 'dash'
+
+            st.plotly_chart(fig_scatter, use_container_width=True)
+
+        with col_gender:
+            # --- 南丁格尔玫瑰图 (性别比例) ---
+            gender_df = df.dropna(subset=['gender'])
+            gender_counts = gender_df['gender'].value_counts().reset_index()
+            gender_counts.columns = ['gender', 'count']
+
+            # 翻译性别标签
+            gender_counts['gender'] = gender_counts['gender'].map(
+                {'male': '男性 (Male)', 'female': '女性 (Female)'}).fillna(gender_counts['gender'])
+
+            fig_rose = px.bar_polar(gender_counts, r="count", theta="gender",
+                                    color="gender", template="plotly_white",
+                                    title="诺奖得主性别比例",
+                                    color_discrete_map={'男性 (Male)': '#636EFA', '女性 (Female)': '#EF553B'})
+
+            fig_rose.update_layout(polar=dict(radialaxis=dict(visible=True, showticklabels=True)))
+            st.plotly_chart(fig_rose, use_container_width=True)
+
+            st.info(
+                "💡 **分析洞察：**\n自然科学领域存在明显的获奖者“老龄化”趋势（基础科学突破需要更长时间的积累）；而右侧玫瑰图则极其直观地揭示了百年来顶尖科研群体中女性科学家比例的演变及巨大悬殊。")
+
+# ==========================================
+# 4. 页面二逻辑：历史切片 (微观分析)
+# ==========================================
+elif page == "板块二：历史切片 (微观分析)":
+    st.title("🕰️ 历史切片：数据背后的地缘与政治")
+
+    era = st.selectbox(
+        "选择您要探索的历史时期",
+        [
+            "切片一：二战阴云与欧洲大脑的流亡 (1930s-1940s)",
+            "切片二：冷战时期的科研军备竞赛 (1950s-1980s)",
+            "切片三：全球化时代的智力剪刀差 (1990s-至今)"
+        ]
+    )
+    st.markdown("---")
+    col1, col2 = st.columns([6, 4])
+
+    if era == "切片一：二战阴云与欧洲大脑的流亡 (1930s-1940s)":
+        with col1:
+            ww2_df = df[
+                (df['year'] >= 1930) & (df['year'] <= 1949) & (df['institutionCountry'] != '无归属机构(如文学/和平奖)')]
+            ww2_inst = ww2_df['institutionCountry'].value_counts().reset_index()
+            ww2_inst.columns = ['institutionCountry', 'count']
+
+            fig_ww2 = px.bar(ww2_inst.head(8), x='institutionCountry', y='count',
+                             color='institutionCountry',
+                             title="1930-1949年：获奖机构所在国人数统计",
+                             labels={'count': '获奖人数', 'institutionCountry': '国家'},
+                             color_discrete_sequence=px.colors.sequential.Reds)
+            st.plotly_chart(fig_ww2, use_container_width=True)
+
+        with col2:
+            st.subheader("法西斯主义与曼哈顿计划")
+            st.markdown("""
+            **历史背景：**
+            20世纪30年代，纳粹德国的反犹政策导致大批顶尖欧洲科学家（如爱因斯坦、马克斯·玻恩）被迫流亡。
+
+            **数据洞察：**
+            从左侧图表可以清晰看到，在1930-1949年间，美国（USA）的获奖人数呈现出压倒性的优势，而曾经的学术中心德国（Germany）和法国（France）数据大幅萎缩。美国凭借远离欧洲战火的安全地缘以及强大的工业基础，完成了世界科学中心的实质性转移。
+            """)
+
+    elif era == "切片二：冷战时期的科研军备竞赛 (1950s-1980s)":
+        with col1:
+            cold_war_df = df[(df['year'] >= 1950) & (df['year'] <= 1989)]
+            target_countries = ['USA', 'USSR (now Russia)', 'United Kingdom']
+            cw_stats = cold_war_df[cold_war_df['institutionCountry'].isin(target_countries)]
+            cw_trend = cw_stats.groupby(['year', 'institutionCountry']).size().reset_index(name='count')
+
+            fig_cw = px.line(cw_trend, x='year', y='count', color='institutionCountry',
+                             title="1950-1989年：美苏英诺奖获得者年度趋势",
+                             markers=True)
+            st.plotly_chart(fig_cw, use_container_width=True)
+
+        with col2:
+            st.subheader("斯普特尼克危机与国家资本")
+            st.markdown("""
+            **历史背景：**
+            冷战期间，“斯普特尼克（Sputnik）”人造卫星的升空引发了美苏两国的科技军备竞赛。
+
+            **数据洞察：**
+            基础科学（尤其是高能物理与航空航天相关）被彻底武器化。美国政府通过设立国家科学基金会（NSF）等机构，向常春藤高校和顶尖实验室注入了史无前例的巨额资金。硬科学高度依赖重资产（如粒子加速器），图表中美国一路攀升的数据线，本质上是大国举国体制与巨额资本投入的直接反映。
+            """)
+
+    elif era == "切片三：全球化时代的智力剪刀差 (1990s-至今)":
+        with col1:
+            modern_df = df[df['year'] >= 1990]
+            born_counts = modern_df['bornCountry_now'].value_counts().head(10).reset_index()
+            inst_counts = modern_df['institutionCountry'].value_counts().head(10).reset_index()
+            born_counts.columns = ['Country', '出生于此']
+            inst_counts.columns = ['Country', '任职于此']
+
+            compare_df = pd.merge(born_counts, inst_counts, on='Country', how='outer').fillna(0)
+            fig_modern = px.bar(compare_df, x='Country', y=['出生于此', '任职于此'],
+                                barmode='group',
+                                title="1990年至今：出生国 vs 机构所在国人数对比",
+                                color_discrete_map={'出生于此': '#1f77b4', '任职于此': '#ff7f0e'})
+            st.plotly_chart(fig_modern, use_container_width=True)
+
+        with col2:
+            st.subheader("资本虹吸与智力流失 (Brain Drain)")
+            st.markdown("""
+            **历史背景：**
+            冷战结束后，资本主义全球化加速，英语成为绝对的学术通用语言。
+
+            **数据洞察：**
+            这是一种现代版的地缘经济“剪刀差”。左图清晰显示，尽管诺奖得主的出生地日益多样化（例如日本等国的蓝柱条很高），但在最终“收割”成果的机构所在地（橙色柱条）上，美国和英国处于绝对的垄断地位。发达国家凭借优渥的科研待遇和顶尖实验设备，无情地虹吸着全球（尤其是发展中国家）耗费大量基础教育资源培养出的顶尖大脑。
+            """)
