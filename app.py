@@ -314,9 +314,17 @@ elif page == "板块二：历史切片 (微观分析)":
     col1, col2 = st.columns([6, 4])
 
     if era == "切片一：二战阴云与欧洲大脑的流亡 (1930s-1940s)":
+        # 1930-1949年数据
+        ww2_df = df[
+            (df['year'] >= 1930) & (df['year'] <= 1949) & (df['institutionCountry'] != '无归属机构(如文学/和平奖)')]
+        
+        # 战前(1930-1939)和战后(1940-1949)数据
+        pre_war_df = df[(df['year'] >= 1930) & (df['year'] <= 1939) & (df['institutionCountry'] != '无归属机构(如文学/和平奖)')]
+        post_war_df = df[(df['year'] >= 1940) & (df['year'] <= 1949) & (df['institutionCountry'] != '无归属机构(如文学/和平奖)')]
+
+        # 第一行：原始柱状图 + 桑基图
+        col1, col2 = st.columns(2)
         with col1:
-            ww2_df = df[
-                (df['year'] >= 1930) & (df['year'] <= 1949) & (df['institutionCountry'] != '无归属机构(如文学/和平奖)')]
             ww2_inst = ww2_df['institutionCountry'].value_counts().reset_index()
             ww2_inst.columns = ['institutionCountry', 'count']
 
@@ -328,14 +336,120 @@ elif page == "板块二：历史切片 (微观分析)":
             st.plotly_chart(fig_ww2, use_container_width=True)
 
         with col2:
-            st.subheader("法西斯主义与曼哈顿计划")
-            st.markdown("""
-            **历史背景：**
-            20世纪30年代，纳粹德国的反犹政策导致大批顶尖欧洲科学家（如爱因斯坦、马克斯·玻恩）被迫流亡。
+            # 流失流向桑基图
+            st.subheader("学者流亡流向桑基图")
+            # 准备桑基图数据
+            sankey_df = ww2_df[(ww2_df['bornCountry_now'] != 'Unknown') & 
+                              (ww2_df['bornCountry_now'] != ww2_df['institutionCountry']) &
+                              (ww2_df['bornCountry_now'].isin(['Germany', 'Austria', 'Italy', 'France', 'Hungary', 'Poland'])) &
+                              (ww2_df['institutionCountry'].isin(['USA', 'United Kingdom', 'Switzerland', 'Sweden']))].copy()
+            
+            if not sankey_df.empty:
+                # 聚合数据
+                flow_data = sankey_df.groupby(['bornCountry_now', 'institutionCountry']).size().reset_index(name='value')
+                
+                # 准备节点和链接
+                sources = flow_data['bornCountry_now'].tolist()
+                targets = flow_data['institutionCountry'].tolist()
+                values = flow_data['value'].tolist()
+                
+                # 创建节点列表
+                nodes = list(set(sources + targets))
+                node_map = {node: i for i, node in enumerate(nodes)}
+                
+                # 转换为索引
+                source_indices = [node_map[source] for source in sources]
+                target_indices = [node_map[target] for target in targets]
+                
+                # 创建桑基图
+                fig_sankey = go.Figure(data=[go.Sankey(
+                    node=dict(
+                        pad=15,
+                        thickness=20,
+                        line=dict(color="black", width=0.5),
+                        label=nodes
+                    ),
+                    link=dict(
+                        source=source_indices,
+                        target=target_indices,
+                        value=values
+                    )
+                )])
+                
+                fig_sankey.update_layout(
+                    title="欧洲学者流亡流向 (1930-1949)",
+                    height=400
+                )
+                st.plotly_chart(fig_sankey, use_container_width=True)
+            else:
+                st.info("暂无足够数据生成桑基图")
 
-            **数据洞察：**
-            从左侧图表可以清晰看到，在1930-1949年间，美国（USA）的获奖人数呈现出压倒性的优势，而曾经的学术中心德国（Germany）和法国（France）数据大幅萎缩。美国凭借远离欧洲战火的安全地缘以及强大的工业基础，完成了世界科学中心的实质性转移。
-            """)
+        # 第二行：学科分布对比 + 年龄分布箱线图
+        col3, col4 = st.columns(2)
+        with col3:
+            # 获奖学科分布对比（战前 vs 战后）
+            st.subheader("获奖学科分布对比")
+            
+            # 战前数据
+            pre_war_cat = pre_war_df.groupby('category').size().reset_index(name='count')
+            pre_war_cat['period'] = '1930-1939 (战前)'
+            
+            # 战后数据
+            post_war_cat = post_war_df.groupby('category').size().reset_index(name='count')
+            post_war_cat['period'] = '1940-1949 (战后)'
+            
+            # 合并数据
+            cat_compare_df = pd.concat([pre_war_cat, post_war_cat])
+            
+            if not cat_compare_df.empty:
+                fig_cat = px.bar(cat_compare_df, x='category', y='count', color='period',
+                               barmode='stack',
+                               title="战前 vs 战后获奖学科分布",
+                               labels={'count': '获奖人数', 'category': '学科'})
+                st.plotly_chart(fig_cat, use_container_width=True)
+            else:
+                st.info("暂无足够数据生成学科分布对比图")
+
+        with col4:
+            # 年龄分布箱线图
+            st.subheader("获奖者年龄分布对比")
+            
+            # 准备年龄数据
+            pre_war_age = pre_war_df.dropna(subset=['age']).copy()
+            pre_war_age['period'] = '1930-1939 (战前)'
+            
+            post_war_age = post_war_df.dropna(subset=['age']).copy()
+            post_war_age['period'] = '1940-1949 (战后)'
+            
+            age_compare_df = pd.concat([pre_war_age, post_war_age])
+            
+            if not age_compare_df.empty:
+                fig_age = px.box(age_compare_df, x='period', y='age',
+                               title="战前 vs 战后获奖者年龄分布",
+                               labels={'age': '获奖年龄', 'period': '时期'})
+                st.plotly_chart(fig_age, use_container_width=True)
+            else:
+                st.info("暂无足够数据生成年龄分布箱线图")
+
+        # 文字描述部分
+        st.markdown("---")
+        st.subheader("法西斯主义与曼哈顿计划")
+        st.markdown("""
+        **历史背景：**
+        20世纪30年代，纳粹德国的反犹政策导致大批顶尖欧洲科学家（如爱因斯坦、马克斯·玻恩）被迫流亡。
+
+        **数据洞察：**
+        从左侧图表可以清晰看到，在1930-1949年间，美国（USA）的获奖人数呈现出压倒性的优势，而曾经的学术中心德国（Germany）和法国（France）数据大幅萎缩。美国凭借远离欧洲战火的安全地缘以及强大的工业基础，完成了世界科学中心的实质性转移。
+        
+        **桑基图分析：**
+        桑基图直观展示了欧洲学者的流亡路径，主要从德国、奥地利等国家流向美国和英国，反映了二战期间的人才大规模迁移。
+        
+        **学科分布变化：**
+        战前与战后的学科分布对比显示，基础科学（如物理、化学）的获奖国籍分布发生了显著变化，美国在这些领域的优势逐渐确立。
+        
+        **年龄结构变化：**
+        年龄分布箱线图展示了战前与战后获奖者的年龄差异，可能反映了流亡学者的职业发展受到战争影响。
+        """)
 
     elif era == "切片二：冷战时期的科研军备竞赛 (1950s-1980s)":
         with col1:
