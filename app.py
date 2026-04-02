@@ -472,11 +472,6 @@ elif page == "板块二：历史切片 (微观分析)":
         - [曼哈顿计划历史](https://www.atomicheritage.org/history/manhattan-project) - 曼哈顿计划的详细历史
         - [纳粹德国的学术迫害](https://en.wikipedia.org/wiki/Expulsion_of_scientists_from_Nazi_Germany) - 纳粹德国对科学家的迫害历史
         - [欧洲流亡学者在美国](https://www.loc.gov/exhibits/escape-or-else/ ) - 美国国会图书馆关于欧洲流亡学者的展览
-        
-        ### 相关历史照片
-        - [爱因斯坦在普林斯顿](https://www.loc.gov/pictures/item/2005679017/) - 爱因斯坦在普林斯顿大学的照片
-        - [曼哈顿计划科学家](https://www.atomicheritage.org/history/photo-gallery) - 参与曼哈顿计划的科学家照片
-        - [纳粹德国学术清洗](https://www.jewishvirtuallibrary.org/nazi-purge-of-jewish-scientists-in-germany) - 纳粹德国清洗犹太科学家的历史照片
         """)
 
     elif era == "切片二：冷战时期的科研军备竞赛 (1950s-1980s)":
@@ -618,11 +613,6 @@ elif page == "板块二：历史切片 (微观分析)":
         - [冷战时期的科技竞赛](https://www.airspacemag.com/space/cold-war-space-race-180968529/) - 冷战时期的太空竞赛历史
         - [国家科学基金会历史](https://www.nsf.gov/about/history/index.jsp) - 美国国家科学基金会的发展历史
         - [曼哈顿计划历史](https://www.atomicheritage.org/history/manhattan-project) - 曼哈顿计划的详细历史
-        
-        ### 相关历史照片
-        - [斯普特尼克卫星](https://www.nasa.gov/sites/default/files/images/566123main_Sputnik_launch_2.jpg) - 斯普特尼克卫星发射照片
-        - [阿波罗11号登月](https://www.nasa.gov/sites/default/files/images/719224main_moonflag_full.jpg) - 阿波罗11号登月照片
-        - [冷战时期的科研实验室](https://www.energy.gov/sites/prod/files/2018/04/f51/Los%20Alamos%20National%20Laboratory%20History.jpg) - 洛斯阿拉莫斯国家实验室历史照片
         """)
 
     elif era == "切片三：全球化时代的智力剪刀差 (1990s-至今)":
@@ -754,9 +744,4 @@ elif page == "板块二：历史切片 (微观分析)":
         - [发展中国家的人才流失](https://www.un.org/development/desa/dpad/publication/globalization-and-the-brain-drain/) - 联合国关于发展中国家人才流失的报告
         - [国际科研合作趋势](https://www.nature.com/articles/s41586-020-2744-3) - 自然杂志关于国际科研合作的研究
         - [知识经济与全球竞争](https://www.worldbank.org/en/publication/wdr2019) - 世界银行关于知识经济的研究报告
-        
-        ### 相关历史照片
-        - [国际学术会议](https://www.science.org/content/images/2020/01/science-367-6473-406-inline.jpg) - 国际学术会议照片
-        - [全球科研合作](https://www.nature.com/static/img/nature-research/logo/logo--large.svg) - 国际科研合作示意图
-        - [发展中国家科研环境](https://www.worldbank.org/content/dam/photos/00-photos/Photo%20Library/BPL-238295-Developing-world-research.jpg) - 发展中国家科研环境照片
         """)
