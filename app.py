@@ -321,149 +321,139 @@ elif page == "板块二：历史切片 (微观分析)":
         pre_war_df = df[(df['year'] >= 1930) & (df['year'] <= 1939) & (df['institutionCountry'] != '无归属机构(如文学/和平奖)')]
         post_war_df = df[(df['year'] >= 1940) & (df['year'] <= 1949) & (df['institutionCountry'] != '无归属机构(如文学/和平奖)')]
 
-        # 第一行：原始柱状图 + 桑基图
-        col1, col2 = st.columns(2)
-        with col1:
-            ww2_inst = ww2_df['institutionCountry'].value_counts().reset_index()
-            ww2_inst.columns = ['institutionCountry', 'count']
-            fig_ww2 = px.bar(ww2_inst.head(8), x='institutionCountry', y='count',
-                             color='institutionCountry',
-                             title="1930-1949年：获奖机构所在国人数统计",
-                             labels={'count': '获奖人数', 'institutionCountry': '国家'},
-                             color_discrete_sequence=px.colors.sequential.Reds)
-            st.plotly_chart(fig_ww2, use_container_width=True)
-
-        with col2:
-            # 流失流向桑基图
-            st.subheader("学者流亡流向桑基图")
-            # 准备桑基图数据
-            sankey_df = ww2_df[(ww2_df['bornCountry_now'] != 'Unknown') & 
-                              (ww2_df['bornCountry_now'] != ww2_df['institutionCountry']) &
-                              (ww2_df['bornCountry_now'].isin(['Germany', 'Austria', 'Italy', 'France', 'Hungary', 'Poland'])) &
-                              (ww2_df['institutionCountry'].isin(['USA', 'United Kingdom', 'Switzerland', 'Sweden']))].copy()
-            
-            if not sankey_df.empty:
-                # 聚合数据
-                flow_data = sankey_df.groupby(['bornCountry_now', 'institutionCountry']).size().reset_index(name='value')
-                
-                # 准备节点和链接
-                sources = flow_data['bornCountry_now'].tolist()
-                targets = flow_data['institutionCountry'].tolist()
-                values = flow_data['value'].tolist()
-                
-                # 创建节点列表
-                nodes = list(set(sources + targets))
-                node_map = {node: i for i, node in enumerate(nodes)}
-                
-                # 转换为索引
-                source_indices = [node_map[source] for source in sources]
-                target_indices = [node_map[target] for target in targets]
-                
-                # 创建桑基图
-                fig_sankey = go.Figure(data=[go.Sankey(
-                    node=dict(
-                        pad=15,
-                        thickness=20,
-                        line=dict(color="black", width=0.5),
-                        label=nodes
-                    ),
-                    link=dict(
-                        source=source_indices,
-                        target=target_indices,
-                        value=values
-                    )
-                )])
-                
-                fig_sankey.update_layout(
-                    title="欧洲学者流亡流向 (1930-1949)",
-                    height=400
-                )
-                st.plotly_chart(fig_sankey, use_container_width=True)
-            else:
-                st.info("暂无足够数据生成桑基图")
-
-        # 第二行：学科分布对比 + 年龄分布箱线图
-        col3, col4 = st.columns(2)
-        with col3:
-            # 获奖学科分布对比（战前 vs 战后）
-            st.subheader("获奖学科分布对比")
-            
-            # 战前数据
-            pre_war_cat = pre_war_df.groupby('category').size().reset_index(name='count')
-            pre_war_cat['period'] = '1930-1939 (战前)'
-            
-            # 战后数据
-            post_war_cat = post_war_df.groupby('category').size().reset_index(name='count')
-            post_war_cat['period'] = '1940-1949 (战后)'
-            
-            # 合并数据
-            cat_compare_df = pd.concat([pre_war_cat, post_war_cat])
-            
-            if not cat_compare_df.empty:
-                fig_cat = px.bar(cat_compare_df, x='category', y='count', color='period',
-                               barmode='stack',
-                               title="战前 vs 战后获奖学科分布",
-                               labels={'count': '获奖人数', 'category': '学科'})
-                st.plotly_chart(fig_cat, use_container_width=True)
-            else:
-                st.info("暂无足够数据生成学科分布对比图")
-
-        with col4:
-            # 年龄分布箱线图
-            st.subheader("获奖者年龄分布对比")
-            
-            # 准备年龄数据
-            pre_war_age = pre_war_df.dropna(subset=['age']).copy()
-            pre_war_age['period'] = '1930-1939 (战前)'
-            
-            post_war_age = post_war_df.dropna(subset=['age']).copy()
-            post_war_age['period'] = '1940-1949 (战后)'
-            
-            age_compare_df = pd.concat([pre_war_age, post_war_age])
-            
-            if not age_compare_df.empty:
-                fig_age = px.box(age_compare_df, x='period', y='age',
-                               title="战前 vs 战后获奖者年龄分布",
-                               labels={'age': '获奖年龄', 'period': '时期'})
-                st.plotly_chart(fig_age, use_container_width=True)
-            else:
-                st.info("暂无足够数据生成年龄分布箱线图")
-
-        # 文字描述部分
-        st.markdown("---")
         st.subheader("法西斯主义与曼哈顿计划")
         
         st.markdown("""
         ### 📜 历史背景
-        20世纪30年代，纳粹德国的反犹政策导致大批顶尖欧洲科学家（如爱因斯坦、马克斯·玻恩）被迫流亡。美国通过"曼哈顿计划"等项目吸引了大量欧洲顶尖科学家，同时本土未受战争影响，为科研提供了稳定环境。
+        20世纪30年代，纳粹德国的反犹政策导致大批顶尖欧洲科学家（如爱因斯坦、马克斯·玻恩）被迫流亡。美国通过"曼哈顿计划"等项目吸引了大量欧洲顶尖科学家，同时本土未受战争影响，为科研提供了稳定环境。这一时期见证了世界科学中心从欧洲向美国的历史性转移。
+        """)
 
-        ### 📊 数据洞察
-        - **美国崛起**：在1930-1949年间，美国的获奖人数呈现压倒性优势，成为最大的诺奖获奖机构所在国
-        - **欧洲衰落**：德国、法国等传统学术中心的获奖人数大幅萎缩
-        - **英国稳定**：英国保持了相对稳定的获奖数量，成为欧洲学术的重要保留地
+        # 获奖机构所在国人数统计
+        st.markdown("### 📊 美国崛起与欧洲衰落")
+        st.markdown("""
+        数据显示，在1930-1949年间，美国的获奖人数呈现压倒性优势，成为最大的诺奖获奖机构所在国。而德国、法国等传统学术中心的获奖人数则大幅萎缩，英国保持了相对稳定的获奖数量，成为欧洲学术的重要保留地。
+        """)
+        
+        ww2_inst = ww2_df['institutionCountry'].value_counts().reset_index()
+        ww2_inst.columns = ['institutionCountry', 'count']
+        fig_ww2 = px.bar(ww2_inst.head(8), x='institutionCountry', y='count',
+                         color='institutionCountry',
+                         title="1930-1949年：获奖机构所在国人数统计",
+                         labels={'count': '获奖人数', 'institutionCountry': '国家'},
+                         color_discrete_sequence=px.colors.sequential.Reds)
+        fig_ww2.update_layout(height=400)
+        st.plotly_chart(fig_ww2, use_container_width=True)
 
-        ### 🌊 流亡流向分析
-        桑基图清晰展示了"欧洲大脑流亡"的具体路径：
-        - **主要流出地**：德国是最大的人才流出国，其次是奥地利、意大利等轴心国
-        - **主要流入地**：美国是最大的人才接收国，其次是英国、瑞士和瑞典
-        - **流动模式**：形成了清晰的"欧洲→美国"单向人才流动
+        # 学者流亡流向桑基图
+        st.markdown("### 🌊 欧洲学者流亡路径")
+        st.markdown("""
+        桑基图清晰展示了"欧洲大脑流亡"的具体路径。德国是最大的人才流出国，其次是奥地利、意大利等轴心国；美国是最大的人才接收国，其次是英国、瑞士和瑞典。这形成了清晰的"欧洲→美国"单向人才流动，深刻改变了全球科学格局。
+        """)
+        
+        # 准备桑基图数据
+        sankey_df = ww2_df[(ww2_df['bornCountry_now'] != 'Unknown') & 
+                          (ww2_df['bornCountry_now'] != ww2_df['institutionCountry']) &
+                          (ww2_df['bornCountry_now'].isin(['Germany', 'Austria', 'Italy', 'France', 'Hungary', 'Poland'])) &
+                          (ww2_df['institutionCountry'].isin(['USA', 'United Kingdom', 'Switzerland', 'Sweden']))].copy()
+        
+        if not sankey_df.empty:
+            # 聚合数据
+            flow_data = sankey_df.groupby(['bornCountry_now', 'institutionCountry']).size().reset_index(name='value')
+            
+            # 准备节点和链接
+            sources = flow_data['bornCountry_now'].tolist()
+            targets = flow_data['institutionCountry'].tolist()
+            values = flow_data['value'].tolist()
+            
+            # 创建节点列表
+            nodes = list(set(sources + targets))
+            node_map = {node: i for i, node in enumerate(nodes)}
+            
+            # 转换为索引
+            source_indices = [node_map[source] for source in sources]
+            target_indices = [node_map[target] for target in targets]
+            
+            # 创建桑基图
+            fig_sankey = go.Figure(data=[go.Sankey(
+                node=dict(
+                    pad=15,
+                    thickness=20,
+                    line=dict(color="black", width=0.5),
+                    label=nodes
+                ),
+                link=dict(
+                    source=source_indices,
+                    target=target_indices,
+                    value=values
+                )
+            )])
+            
+            fig_sankey.update_layout(
+                title="欧洲学者流亡流向 (1930-1949)",
+                height=400
+            )
+            st.plotly_chart(fig_sankey, use_container_width=True)
+        else:
+            st.info("暂无足够数据生成桑基图")
 
-        ### 🔬 学科分布变化
-        战前与战后的学科分布对比显示：
-        - **物理化学**：战前欧洲占主导，战后美国迅速崛起
-        - **医学领域**：分布相对稳定，但美国比重明显增加
-        - **人文领域**：文学、和平奖等受战争影响相对较小
+        # 获奖学科分布对比
+        st.markdown("### 🔬 学科分布的战前战后变化")
+        st.markdown("""
+        战前与战后的学科分布对比显示，物理化学领域战前由欧洲占主导，战后美国迅速崛起；医学领域分布相对稳定，但美国比重明显增加；人文领域如文学、和平奖等受战争影响相对较小。这反映了战争对不同学科发展的差异化影响。
+        """)
+        
+        # 战前数据
+        pre_war_cat = pre_war_df.groupby('category').size().reset_index(name='count')
+        pre_war_cat['period'] = '1930-1939 (战前)'
+        
+        # 战后数据
+        post_war_cat = post_war_df.groupby('category').size().reset_index(name='count')
+        post_war_cat['period'] = '1940-1949 (战后)'
+        
+        # 合并数据
+        cat_compare_df = pd.concat([pre_war_cat, post_war_cat])
+        
+        if not cat_compare_df.empty:
+            fig_cat = px.bar(cat_compare_df, x='category', y='count', color='period',
+                           barmode='stack',
+                           title="战前 vs 战后获奖学科分布",
+                           labels={'count': '获奖人数', 'category': '学科'})
+            fig_cat.update_layout(height=400)
+            st.plotly_chart(fig_cat, use_container_width=True)
+        else:
+            st.info("暂无足够数据生成学科分布对比图")
 
-        ### 📈 年龄结构分析
-        年龄分布箱线图反映了：
-        - **延迟效应**：流亡学者可能因战争中断研究，导致获奖年龄偏大
-        - **职业发展**：战争影响了年轻学者的职业发展轨迹
-        - **代际传承**：年龄结构变化反映了战争对学术代际传承的影响
+        # 年龄分布箱线图
+        st.markdown("### 📈 获奖者年龄结构的战争影响")
+        st.markdown("""
+        年龄分布箱线图反映了战争对学者职业发展的深刻影响。流亡学者可能因战争中断研究，导致获奖年龄偏大；战争也影响了年轻学者的职业发展轨迹，造成学术代际传承的断裂。这种年龄结构变化是战争对科学发展隐性影响的重要体现。
+        """)
+        
+        # 准备年龄数据
+        pre_war_age = pre_war_df.dropna(subset=['age']).copy()
+        pre_war_age['period'] = '1930-1939 (战前)'
+        
+        post_war_age = post_war_df.dropna(subset=['age']).copy()
+        post_war_age['period'] = '1940-1949 (战后)'
+        
+        age_compare_df = pd.concat([pre_war_age, post_war_age])
+        
+        if not age_compare_df.empty:
+            fig_age = px.box(age_compare_df, x='period', y='age',
+                           title="战前 vs 战后获奖者年龄分布",
+                           labels={'age': '获奖年龄', 'period': '时期'})
+            fig_age.update_layout(height=400)
+            st.plotly_chart(fig_age, use_container_width=True)
+        else:
+            st.info("暂无足够数据生成年龄分布箱线图")
 
-        ### 💡 历史启示
-        - **科学中心转移**：二战期间完成了世界科学中心从欧洲到美国的实质性转移
-        - **人才流动**：政治稳定和学术自由是科学发展的重要保障
-        - **战争影响**：战争不仅破坏物质基础设施，也改变了知识生产的地理分布
+        # 历史启示
+        st.markdown("### 💡 历史启示")
+        st.markdown("""
+        - **科学中心转移**：二战期间完成了世界科学中心从欧洲到美国的实质性转移，这一转变至今仍影响着全球科学格局
+        - **人才流动**：政治稳定和学术自由是科学发展的重要保障，人才总是流向能够提供更好研究环境的地区
+        - **战争影响**：战争不仅破坏物质基础设施，也改变了知识生产的地理分布，这种影响具有长期的历史效应
+        - **学术传承**：科学发展依赖于稳定的学术传承，战争中断了这一过程，对科学发展产生了深远的负面影响
         """)
         
         # 历史资料
@@ -471,9 +461,9 @@ elif page == "板块二：历史切片 (微观分析)":
         
         st.markdown("""
         ### 相关事件
-        - **爱因斯坦流亡**：1933年，爱因斯坦因纳粹迫害离开德国，前往美国普林斯顿大学
-        - **曼哈顿计划**：由流亡科学家主导的核武器研发计划，加速了二战结束
-        - **欧洲学者流亡潮**：1933-1938年间，德国有超过2000名科学家被迫离开，其中包括20多位诺奖得主
+        - **爱因斯坦流亡**：1933年，爱因斯坦因纳粹迫害离开德国，前往美国普林斯顿大学，成为美国科学崛起的象征性事件
+        - **曼哈顿计划**：由流亡科学家主导的核武器研发计划，不仅加速了二战结束，也奠定了美国在核物理学领域的领先地位
+        - **欧洲学者流亡潮**：1933-1938年间，德国有超过2000名科学家被迫离开，其中包括20多位诺奖得主，形成了人类历史上规模最大的一次科学人才迁移
         """)
         
         st.markdown("""
@@ -482,6 +472,11 @@ elif page == "板块二：历史切片 (微观分析)":
         - [曼哈顿计划历史](https://www.atomicheritage.org/history/manhattan-project) - 曼哈顿计划的详细历史
         - [纳粹德国的学术迫害](https://en.wikipedia.org/wiki/Expulsion_of_scientists_from_Nazi_Germany) - 纳粹德国对科学家的迫害历史
         - [欧洲流亡学者在美国](https://www.loc.gov/exhibits/escape-or-else/ ) - 美国国会图书馆关于欧洲流亡学者的展览
+        
+        ### 相关历史照片
+        - [爱因斯坦在普林斯顿](https://www.loc.gov/pictures/item/2005679017/) - 爱因斯坦在普林斯顿大学的照片
+        - [曼哈顿计划科学家](https://www.atomicheritage.org/history/photo-gallery) - 参与曼哈顿计划的科学家照片
+        - [纳粹德国学术清洗](https://www.jewishvirtuallibrary.org/nazi-purge-of-jewish-scientists-in-germany) - 纳粹德国清洗犹太科学家的历史照片
         """)
 
     elif era == "切片二：冷战时期的科研军备竞赛 (1950s-1980s)":
@@ -490,119 +485,119 @@ elif page == "板块二：历史切片 (微观分析)":
         target_countries = ['USA', 'USSR (now Russia)', 'United Kingdom']
         cw_stats = cold_war_df[cold_war_df['institutionCountry'].isin(target_countries)]
 
-        # 第一行：原始折线图 + 学科细分趋势
-        col1, col2 = st.columns(2)
-        with col1:
-            cw_trend = cw_stats.groupby(['year', 'institutionCountry']).size().reset_index(name='count')
-            fig_cw = px.line(cw_trend, x='year', y='count', color='institutionCountry',
-                             title="1950-1989年：美苏英诺奖获得者年度趋势",
-                             markers=True)
-            st.plotly_chart(fig_cw, use_container_width=True)
-
-        with col2:
-            # 学科细分趋势
-            st.subheader("学科细分趋势")
-            # 筛选美苏两国数据
-            us_ussr_df = cold_war_df[cold_war_df['institutionCountry'].isin(['USA', 'USSR (now Russia)'])]
-            # 筛选主要学科
-            main_categories = ['physics', 'chemistry', 'medicine']
-            us_ussr_cat_df = us_ussr_df[us_ussr_df['category'].isin(main_categories)]
-            
-            if not us_ussr_cat_df.empty:
-                cat_trend = us_ussr_cat_df.groupby(['year', 'institutionCountry', 'category']).size().reset_index(name='count')
-                fig_cat = px.line(cat_trend, x='year', y='count', color='institutionCountry',
-                                facet_row='category',
-                                title="美苏分学科获奖趋势",
-                                labels={'count': '获奖人数', 'year': '年份', 'institutionCountry': '国家'})
-                st.plotly_chart(fig_cat, use_container_width=True)
-            else:
-                st.info("暂无足够数据生成学科细分趋势图")
-
-        # 第二行：获奖机构性质分布 + 流亡学者影响
-        col3, col4 = st.columns(2)
-        with col3:
-            # 获奖机构性质分布
-            st.subheader("美国获奖机构性质分布")
-            # 筛选美国数据
-            us_df = cold_war_df[cold_war_df['institutionCountry'] == 'USA']
-            
-            if not us_df.empty:
-                # 机构分类
-                def classify_institution(name):
-                    if pd.isna(name):
-                        return '其他'
-                    name_lower = str(name).lower()
-                    if any(keyword in name_lower for keyword in ['university', 'univ', 'college', 'institute of technology']):
-                        return '大学'
-                    elif any(keyword in name_lower for keyword in ['laboratory', 'lab', 'national', 'los alamos', 'bell labs']):
-                        return '政府/国家实验室'
-                    else:
-                        return '其他'
-                
-                us_df['institution_type'] = us_df['institutionName'].apply(classify_institution)
-                inst_type_trend = us_df.groupby(['year', 'institution_type']).size().reset_index(name='count')
-                
-                fig_inst = px.area(inst_type_trend, x='year', y='count', color='institution_type',
-                                 title="美国获奖机构性质年度分布",
-                                 labels={'count': '获奖人数', 'year': '年份', 'institution_type': '机构类型'})
-                st.plotly_chart(fig_inst, use_container_width=True)
-            else:
-                st.info("暂无足够数据生成机构性质分布图")
-
-        with col4:
-            # 流亡学者在冷战中期的持续影响
-            st.subheader("流亡学者持续影响")
-            # 筛选欧洲出生、美国获奖的学者
-            eu_born_us_awarded = cold_war_df[(cold_war_df['bornCountry_now'].isin(['Germany', 'Austria', 'Italy', 'France', 'Hungary', 'Poland', 'United Kingdom'])) &
-                                           (cold_war_df['institutionCountry'] == 'USA')]
-            
-            if not eu_born_us_awarded.empty:
-                # 按年份分布
-                exile_trend = eu_born_us_awarded.groupby('year').size().reset_index(name='count')
-                # 填充缺失年份
-                all_years = pd.DataFrame({'year': range(1950, 1990)})
-                exile_trend = pd.merge(all_years, exile_trend, on='year', how='left').fillna({'count': 0})
-                
-                fig_exile = px.bar(exile_trend, x='year', y='count',
-                                 title="欧洲出生学者在美国获奖时间分布",
-                                 labels={'count': '获奖人数', 'year': '年份'})
-                st.plotly_chart(fig_exile, use_container_width=True)
-            else:
-                st.info("暂无足够数据生成流亡学者影响图")
-
-        # 文字描述部分
-        st.markdown("---")
         st.subheader("斯普特尼克危机与国家资本")
         
         st.markdown("""
         ### 📜 历史背景
-        冷战期间，“斯普特尼克（Sputnik）”人造卫星的升空引发了美苏两国的科技军备竞赛。美国政府通过设立国家科学基金会（NSF）等机构，向常春藤高校和顶尖实验室注入了史无前例的巨额资金。
+        冷战期间，“斯普特尼克（Sputnik）”人造卫星的升空引发了美苏两国的科技军备竞赛。美国政府通过设立国家科学基金会（NSF）等机构，向常春藤高校和顶尖实验室注入了史无前例的巨额资金，将科学研究提升到国家战略高度。
+        """)
 
-        ### 📊 数据洞察
-        - **美国优势**：在1950-1989年间，美国的获奖人数呈现持续增长趋势，远远超过苏联和英国
-        - **苏联波动**：苏联的获奖数量相对稳定，但在某些时期有明显波动
-        - **英国稳定**：英国保持了相对稳定的获奖水平
+        # 美苏英诺奖获得者年度趋势
+        st.markdown("### 📊 美苏英三国获奖趋势对比")
+        st.markdown("""
+        数据显示，在1950-1989年间，美国的获奖人数呈现持续增长趋势，远远超过苏联和英国。苏联的获奖数量相对稳定，但在某些时期有明显波动，反映了其科研体制的特点。英国则保持了相对稳定的获奖水平，作为欧洲传统学术强国的地位得以维持。
+        """)
+        
+        cw_trend = cw_stats.groupby(['year', 'institutionCountry']).size().reset_index(name='count')
+        fig_cw = px.line(cw_trend, x='year', y='count', color='institutionCountry',
+                         title="1950-1989年：美苏英诺奖获得者年度趋势",
+                         markers=True,
+                         color_discrete_sequence=px.colors.qualitative.Set1)
+        fig_cw.update_layout(height=500)
+        st.plotly_chart(fig_cw, use_container_width=True)
 
-        ### 🔬 学科细分分析
-        - **物理学**：苏联在1957年发射卫星后可能有短期波动，但美国整体优势明显
-        - **化学**：美国在化学领域的优势更为显著
-        - **医学**：两国在医学领域的竞争相对缓和
+        # 学科细分趋势
+        st.markdown("### 🔬 美苏分学科获奖趋势")
+        st.markdown("""
+        按学科细分分析显示，苏联在1957年发射卫星后，物理学领域的获奖情况可能有短期波动，但美国整体优势明显。化学领域美国的优势更为显著，而医学领域两国的竞争相对缓和。这种差异反映了两国科研重点的不同：苏联更注重与国防相关的硬科学，而美国则在基础研究和应用研究方面全面发展。
+        """)
+        
+        # 筛选美苏两国数据
+        us_ussr_df = cold_war_df[cold_war_df['institutionCountry'].isin(['USA', 'USSR (now Russia)'])]
+        # 筛选主要学科
+        main_categories = ['physics', 'chemistry', 'medicine']
+        us_ussr_cat_df = us_ussr_df[us_ussr_df['category'].isin(main_categories)]
+        
+        if not us_ussr_cat_df.empty:
+            cat_trend = us_ussr_cat_df.groupby(['year', 'institutionCountry', 'category']).size().reset_index(name='count')
+            fig_cat = px.line(cat_trend, x='year', y='count', color='institutionCountry',
+                            facet_row='category',
+                            title="美苏分学科获奖趋势",
+                            labels={'count': '获奖人数', 'year': '年份', 'institutionCountry': '国家'},
+                            color_discrete_sequence=px.colors.qualitative.Set1)
+            fig_cat.update_layout(height=600, autosize=True)
+            st.plotly_chart(fig_cat, use_container_width=True)
+        else:
+            st.info("暂无足够数据生成学科细分趋势图")
 
-        ### 🏛️ 机构性质分析
-        - **大学主导**：美国大学始终是诺奖获奖的主要机构
-        - **实验室崛起**：政府实验室和国家实验室在冷战期间发挥了重要作用
-        - **资本投入**：硬科学高度依赖重资产（如粒子加速器），体现了国家资本投入的重要性
+        # 美国获奖机构性质分布
+        st.markdown("### 🏛️ 美国获奖机构性质分析")
+        st.markdown("""
+        美国获奖机构性质分析显示，大学始终是诺奖获奖的主要机构，但政府实验室和国家实验室在冷战期间发挥了重要作用。这反映了冷战时期美国科研体系的特点：大学作为基础研究的核心，而国家实验室则承担了大量与国防相关的应用研究。硬科学高度依赖重资产（如粒子加速器），体现了国家资本投入的重要性。
+        """)
+        
+        # 筛选美国数据
+        us_df = cold_war_df[cold_war_df['institutionCountry'] == 'USA']
+        
+        if not us_df.empty:
+            # 机构分类
+            def classify_institution(name):
+                if pd.isna(name):
+                    return '其他'
+                name_lower = str(name).lower()
+                if any(keyword in name_lower for keyword in ['university', 'univ', 'college', 'institute of technology']):
+                    return '大学'
+                elif any(keyword in name_lower for keyword in ['laboratory', 'lab', 'national', 'los alamos', 'bell labs']):
+                    return '政府/国家实验室'
+                else:
+                    return '其他'
+            
+            us_df['institution_type'] = us_df['institutionName'].apply(classify_institution)
+            inst_type_trend = us_df.groupby(['year', 'institution_type']).size().reset_index(name='count')
+            
+            fig_inst = px.area(inst_type_trend, x='year', y='count', color='institution_type',
+                             title="美国获奖机构性质年度分布",
+                             labels={'count': '获奖人数', 'year': '年份', 'institution_type': '机构类型'},
+                             color_discrete_sequence=px.colors.qualitative.Set2)
+            fig_inst.update_layout(height=450)
+            st.plotly_chart(fig_inst, use_container_width=True)
+        else:
+            st.info("暂无足够数据生成机构性质分布图")
 
-        ### 🌍 流亡学者影响
-        - **持续贡献**：二战后的20-30年间（1950s-1970s），仍有一批欧洲出生的学者在美国获奖
-        - **代际影响**：流亡学者不仅自身获奖，还培养了新一代科学家，形成了学术传承
-        - **知识转移**：欧洲学术传统与美国研究环境的结合，推动了美国科学的快速发展
+        # 流亡学者在冷战中期的持续影响
+        st.markdown("### 🌍 流亡学者的持续影响")
+        st.markdown("""
+        二战后的20-30年间（1950s-1970s），仍有一批欧洲出生的学者在美国获奖，体现了“流亡一代”的持续贡献。这些学者不仅自身获奖，还培养了新一代科学家，形成了学术传承。欧洲学术传统与美国研究环境的结合，推动了美国科学的快速发展，是美国在冷战时期科技领先的重要因素之一。
+        """)
+        
+        # 筛选欧洲出生、美国获奖的学者
+        eu_born_us_awarded = cold_war_df[(cold_war_df['bornCountry_now'].isin(['Germany', 'Austria', 'Italy', 'France', 'Hungary', 'Poland', 'United Kingdom'])) &
+                                       (cold_war_df['institutionCountry'] == 'USA')]
+        
+        if not eu_born_us_awarded.empty:
+            # 按年份分布
+            exile_trend = eu_born_us_awarded.groupby('year').size().reset_index(name='count')
+            # 填充缺失年份
+            all_years = pd.DataFrame({'year': range(1950, 1990)})
+            exile_trend = pd.merge(all_years, exile_trend, on='year', how='left').fillna({'count': 0})
+            
+            fig_exile = px.bar(exile_trend, x='year', y='count',
+                             title="欧洲出生学者在美国获奖时间分布",
+                             labels={'count': '获奖人数', 'year': '年份'},
+                             color_discrete_sequence=px.colors.qualitative.Set3)
+            fig_exile.update_layout(height=450)
+            st.plotly_chart(fig_exile, use_container_width=True)
+        else:
+            st.info("暂无足够数据生成流亡学者影响图")
 
-        ### 💡 历史启示
-        - **国家战略**：科学研究成为国家战略的重要组成部分
-        - **资本投入**：大规模的国家资本投入是科技领先的关键因素
-        - **人才流动**：国际人才流动对科学发展具有深远影响
-        - **学术自由**：在竞争环境下，保持学术自由与创新精神至关重要
+        # 历史启示
+        st.markdown("### 💡 历史启示")
+        st.markdown("""
+        - **国家战略**：冷战期间，科学研究成为国家战略的重要组成部分，直接服务于国家利益和安全
+        - **资本投入**：大规模的国家资本投入是科技领先的关键因素，特别是在需要重资产的硬科学领域
+        - **人才流动**：国际人才流动对科学发展具有深远影响，二战后的欧洲学者流亡为美国科技崛起提供了重要动力
+        - **学术自由**：在竞争环境下，保持学术自由与创新精神至关重要，这是美国相对于苏联的优势之一
+        - **科研体系**：多元化的科研体系（大学+国家实验室）能够更好地应对不同类型的科研挑战
         """)
         
         # 历史资料
@@ -610,9 +605,10 @@ elif page == "板块二：历史切片 (微观分析)":
         
         st.markdown("""
         ### 相关事件
-        - **斯普特尼克危机**：1957年苏联发射第一颗人造卫星，引发美国科技恐慌
-        - **阿波罗计划**：美国为应对苏联挑战而启动的登月计划，1969年成功实现人类首次登月
-        - **国家科学基金会**：1950年成立，冷战期间预算从1957年的4000万美元增加到1968年的5亿美元
+        - **斯普特尼克危机**：1957年苏联发射第一颗人造卫星，引发美国科技恐慌，直接推动了美国太空计划和科学教育改革
+        - **阿波罗计划**：美国为应对苏联挑战而启动的登月计划，1969年成功实现人类首次登月，是冷战时期科技竞赛的巅峰之作
+        - **国家科学基金会**：1950年成立，冷战期间预算从1957年的4000万美元增加到1968年的5亿美元，成为美国基础研究的主要资助机构
+        - **曼哈顿计划后遗症**：二战期间的曼哈顿计划为冷战时期的科研体制奠定了基础，形成了政府、大学和工业界合作的科研模式
         """)
         
         st.markdown("""
@@ -621,74 +617,93 @@ elif page == "板块二：历史切片 (微观分析)":
         - [阿波罗计划](https://www.nasa.gov/mission_pages/apollo/missions/) - NASA阿波罗计划的详细资料
         - [冷战时期的科技竞赛](https://www.airspacemag.com/space/cold-war-space-race-180968529/) - 冷战时期的太空竞赛历史
         - [国家科学基金会历史](https://www.nsf.gov/about/history/index.jsp) - 美国国家科学基金会的发展历史
+        - [曼哈顿计划历史](https://www.atomicheritage.org/history/manhattan-project) - 曼哈顿计划的详细历史
+        
+        ### 相关历史照片
+        - [斯普特尼克卫星](https://www.nasa.gov/sites/default/files/images/566123main_Sputnik_launch_2.jpg) - 斯普特尼克卫星发射照片
+        - [阿波罗11号登月](https://www.nasa.gov/sites/default/files/images/719224main_moonflag_full.jpg) - 阿波罗11号登月照片
+        - [冷战时期的科研实验室](https://www.energy.gov/sites/prod/files/2018/04/f51/Los%20Alamos%20National%20Laboratory%20History.jpg) - 洛斯阿拉莫斯国家实验室历史照片
         """)
 
     elif era == "切片三：全球化时代的智力剪刀差 (1990s-至今)":
         # 1990年至今数据
         modern_df = df[df['year'] >= 1990]
 
-        # 第一行：原始对比图 + 发展中国家人才流失
-        col1, col2 = st.columns(2)
-        with col1:
-            born_counts = modern_df['bornCountry_now'].value_counts().head(10).reset_index()
-            inst_counts = modern_df['institutionCountry'].value_counts().head(10).reset_index()
-            born_counts.columns = ['Country', '出生于此']
-            inst_counts.columns = ['Country', '任职于此']
-            
-            compare_df = pd.merge(born_counts, inst_counts, on='Country', how='outer').fillna(0)
-            fig_modern = px.bar(compare_df, x='Country', y=['出生于此', '任职于此'],
-                                barmode='group',
-                                title="1990年至今：出生国 vs 机构所在国人数对比",
-                                color_discrete_map={'出生于此': '#1f77b4', '任职于此': '#ff7f0e'})
-            fig_modern.update_layout(height=450)
-            st.plotly_chart(fig_modern, use_container_width=True)
-
-        with col2:
-            # 发展中国家人才流失分析
-            st.subheader("发展中国家人才流失")
-            # 定义发展中国家列表
-            developing_countries = ['China', 'India', 'South Korea', 'Brazil', 'Mexico', 'Iran', 'Turkey', 'Egypt', 'Pakistan', 'Thailand']
-            # 筛选发展中国家出生、发达国家任职的数据
-            brain_drain_df = modern_df[(modern_df['bornCountry_now'].isin(developing_countries)) &
-                                     (modern_df['institutionCountry'].isin(['USA', 'United Kingdom', 'Germany', 'France', 'Canada', 'Switzerland', 'Sweden', 'Japan', 'Australia']))]
-            
-            if not brain_drain_df.empty:
-                drain_by_country = brain_drain_df['bornCountry_now'].value_counts().reset_index()
-                drain_by_country.columns = ['Country', 'count']
-                
-                fig_drain = px.bar(drain_by_country, x='Country', y='count',
-                                 title="发展中国家人才流失去向",
-                                 labels={'count': '人数'},
-                                 color_discrete_sequence=px.colors.qualitative.Set2)
-                fig_drain.update_layout(height=450)
-                st.plotly_chart(fig_drain, use_container_width=True)
-            else:
-                st.info("暂无足够数据生成人才流失分析图")
-
-        # 第二行：学科国际化趋势 + 年龄结构变化
-        col3, col4 = st.columns(2)
-        with col3:
-            # 学科国际化趋势
-            st.subheader("学科国际化趋势")
-            # 按学科和机构所在国分组
-            intl_trend = modern_df.groupby(['category', 'institutionCountry']).size().reset_index(name='count')
-            
-            if not intl_trend.empty:
-                fig_intl = px.sunburst(intl_trend, path=['category', 'institutionCountry'], values='count',
-                                     title="各学科国际化趋势",
-                                     color_discrete_sequence=px.colors.qualitative.Pastel1)
-                fig_intl.update_layout(height=600)
-                st.plotly_chart(fig_intl, use_container_width=True)
-            else:
-                st.info("暂无足够数据生成国际化趋势图")
+        st.subheader("全球化时代的智力剪刀差")
         
         st.markdown("""
-        ### 📈 年龄结构变化
-        现代诺奖得主的年龄分布呈现多样化趋势，部分学科（如基础科学）的获奖年龄有所增加。全球化背景下，学者的职业发展路径更加国际化。
+        ### 📜 历史背景
+        冷战结束后，全球化浪潮席卷全球，资本、技术和人才的流动达到了前所未有的规模。在这一背景下，科学研究也进入了全球化时代，诺奖数据清晰地反映了这一趋势。
+        """)
+
+        # 出生国与机构所在国对比
+        st.markdown("### 📊 全球人才流动格局")
+        st.markdown("""
+        1990年至今的诺奖数据显示，发达国家仍然是诺奖的主要获得者，同时也是全球人才的主要目的地。美国、英国、德国等发达国家不仅拥有大量本土出生的获奖者，还吸引了来自全球各地的顶尖人才。这种人才流动模式形成了所谓的“智力剪刀差”，即发达国家与发展中国家在科技人才方面的差距不断扩大。
         """)
         
+        born_counts = modern_df['bornCountry_now'].value_counts().head(10).reset_index()
+        inst_counts = modern_df['institutionCountry'].value_counts().head(10).reset_index()
+        born_counts.columns = ['Country', '出生于此']
+        inst_counts.columns = ['Country', '任职于此']
+        
+        compare_df = pd.merge(born_counts, inst_counts, on='Country', how='outer').fillna(0)
+        fig_modern = px.bar(compare_df, x='Country', y=['出生于此', '任职于此'],
+                            barmode='group',
+                            title="1990年至今：出生国 vs 机构所在国人数对比",
+                            color_discrete_map={'出生于此': '#1f77b4', '任职于此': '#ff7f0e'})
+        fig_modern.update_layout(height=500)
+        st.plotly_chart(fig_modern, use_container_width=True)
+
+        # 发展中国家人才流失分析
+        st.markdown("### 🌍 发展中国家人才流失")
+        st.markdown("""
+        发展中国家面临着严重的人才流失问题。中国、印度、韩国等发展中国家虽然培养了大量优秀人才，但这些人才往往选择到发达国家从事研究工作。1990-2010年间，发展中国家有超过300万高技能人才流向发达国家，其中包括许多潜在的诺奖级科学家。这种人才流失不仅影响了发展中国家的科技发展，也加剧了全球科技发展的不平衡。
+        """)
+        
+        # 定义发展中国家列表
+        developing_countries = ['China', 'India', 'South Korea', 'Brazil', 'Mexico', 'Iran', 'Turkey', 'Egypt', 'Pakistan', 'Thailand']
+        # 筛选发展中国家出生、发达国家任职的数据
+        brain_drain_df = modern_df[(modern_df['bornCountry_now'].isin(developing_countries)) &
+                                 (modern_df['institutionCountry'].isin(['USA', 'United Kingdom', 'Germany', 'France', 'Canada', 'Switzerland', 'Sweden', 'Japan', 'Australia']))]
+        
+        if not brain_drain_df.empty:
+            drain_by_country = brain_drain_df['bornCountry_now'].value_counts().reset_index()
+            drain_by_country.columns = ['Country', 'count']
+            
+            fig_drain = px.bar(drain_by_country, x='Country', y='count',
+                             title="发展中国家人才流失去向",
+                             labels={'count': '人数'},
+                             color_discrete_sequence=px.colors.qualitative.Set2)
+            fig_drain.update_layout(height=450)
+            st.plotly_chart(fig_drain, use_container_width=True)
+        else:
+            st.info("暂无足够数据生成人才流失分析图")
+
+        # 学科国际化趋势
+        st.markdown("### 🔬 学科国际化趋势")
+        st.markdown("""
+        全球化时代，各学科的国际化程度不断提高。英语成为学术通用语言，国际合作日益频繁，跨国研究团队成为常态。不同学科的国际化程度有所差异，基础科学领域的国际化程度通常高于应用科学和人文社科领域。这种国际化趋势既促进了知识的全球共享，也加剧了科技资源的集中。
+        """)
+        
+        # 按学科和机构所在国分组
+        intl_trend = modern_df.groupby(['category', 'institutionCountry']).size().reset_index(name='count')
+        
+        if not intl_trend.empty:
+            fig_intl = px.sunburst(intl_trend, path=['category', 'institutionCountry'], values='count',
+                                 title="各学科国际化趋势",
+                                 color_discrete_sequence=px.colors.qualitative.Pastel1)
+            fig_intl.update_layout(height=600)
+            st.plotly_chart(fig_intl, use_container_width=True)
+        else:
+            st.info("暂无足够数据生成国际化趋势图")
+
         # 年龄结构变化
-        st.markdown("#### 1990年代至今获奖者年龄分布")
+        st.markdown("### 📈 获奖者年龄结构变化")
+        st.markdown("""
+        现代诺奖得主的年龄分布呈现多样化趋势，部分学科（如基础科学）的获奖年龄有所增加。这反映了科学研究的日益复杂性和专业化，许多重大科学发现需要更长时间的积累和验证。同时，全球化背景下，学者的职业发展路径更加国际化，也可能影响了获奖年龄的分布。
+        """)
+        
         if not modern_df.empty:
             # 按年代分组
             modern_df['decade'] = (modern_df['year'] // 10) * 10
@@ -698,28 +713,27 @@ elif page == "板块二：历史切片 (微观分析)":
                            title="1990年代至今获奖者年龄分布",
                            labels={'age': '获奖年龄', 'decade': '年代'},
                            color_discrete_sequence=px.colors.qualitative.Pastel2)
-            fig_age.update_layout(height=400, yaxis=dict(range=[20, 100]))
+            fig_age.update_layout(height=450, yaxis=dict(range=[20, 100]))
             st.plotly_chart(fig_age, use_container_width=True)
         else:
             st.info("暂无足够数据生成年龄结构变化图")
-        
+
+        # 历史启示
+        st.markdown("### 💡 历史启示")
         st.markdown("""
-        ### 历史启示
-        全球化时代的诺奖数据揭示了科学发展的新趋势和挑战：
+        - **全球化与人才流动**：全球化加剧了人才流动的不平衡性，形成了“智力剪刀差”。发达国家凭借优越的科研条件和环境，吸引了全球各地的顶尖人才，而发展中国家则面临着人才流失的挑战。这种不平衡的人才流动模式可能会进一步加剧全球科技发展的差距。
         
-        **全球化与人才流动**：全球化加剧了人才流动的不平衡性，形成了“智力剪刀差”。发达国家凭借优越的科研条件和环境，吸引了全球各地的顶尖人才，而发展中国家则面临着人才流失的挑战。这种不平衡的人才流动模式可能会进一步加剧全球科技发展的差距。
+        - **科研生态系统的重要性**：发达国家的科研生态系统对全球人才具有强大吸引力。完善的科研基础设施、充足的研究经费、开放的学术环境和良好的职业发展机会，共同构成了吸引人才的“磁力场”。发展中国家要想留住和吸引人才，需要构建具有国际竞争力的科研生态系统。
         
-        **科研生态系统的重要性**：发达国家的科研生态系统对全球人才具有强大吸引力。完善的科研基础设施、充足的研究经费、开放的学术环境和良好的职业发展机会，共同构成了吸引人才的“磁力场”。发展中国家要想留住和吸引人才，需要构建具有国际竞争力的科研生态系统。
+        - **人才政策的反思**：发展中国家需要制定更加有效的人才政策，包括：
+          1. **加大科研投入**：提高研究经费占GDP的比例，改善科研基础设施
+          2. **优化学术环境**：提高学术自由度，减少行政干预，营造良好的创新氛围
+          3. **完善激励机制**：建立科学合理的薪酬体系和评价机制，激发科研人员的积极性
+          4. **加强国际合作**：通过国际合作项目，吸引海外人才参与国内科研
         
-        **人才政策的反思**：发展中国家需要制定更加有效的人才政策，包括：
-        1. **加大科研投入**：提高研究经费占GDP的比例，改善科研基础设施。
-        2. **优化学术环境**：提高学术自由度，减少行政干预，营造良好的创新氛围。
-        3. **完善激励机制**：建立科学合理的薪酬体系和评价机制，激发科研人员的积极性。
-        4. **加强国际合作**：通过国际合作项目，吸引海外人才参与国内科研。
+        - **国际合作的重要性**：在全球化时代，加强国际科研合作至关重要。国际合作不仅可以促进知识共享和技术转移，还可以缓解人才流失的负面影响。例如，通过联合实验室、国际会议和学术交流项目，发展中国家可以利用全球智力资源，提升自身的科研水平。
         
-        **国际合作的重要性**：在全球化时代，加强国际科研合作至关重要。国际合作不仅可以促进知识共享和技术转移，还可以缓解人才流失的负面影响。例如，通过联合实验室、国际会议和学术交流项目，发展中国家可以利用全球智力资源，提升自身的科研水平。
-        
-        **历史教训**：科学发展是一个长期的过程，需要持续的投入和积累。发展中国家要想在科技领域取得突破，需要制定长远的科技发展战略，注重基础研究和人才培养，构建具有自身特色的科研体系。同时，发达国家也应该承担更多的国际责任，通过技术援助和知识共享，帮助发展中国家提升科技水平，促进全球科技的均衡发展。
+        - **全球科技治理**：全球化时代的科技发展需要更加公平合理的全球治理机制。发达国家应该承担更多的国际责任，通过技术援助和知识共享，帮助发展中国家提升科技水平，促进全球科技的均衡发展。同时，国际社会应该共同努力，建立更加公平的科技资源分配机制，确保科技发展的成果惠及全人类。
         """)
         
         # 历史资料
@@ -727,9 +741,10 @@ elif page == "板块二：历史切片 (微观分析)":
         
         st.markdown("""
         ### 相关事件
-        - **全球化浪潮**：冷战结束后，资本、技术和人才的全球流动加速
-        - **学术全球化**：英语成为学术通用语言，国际合作日益频繁
-        - **人才流失**：1990-2010年间，发展中国家有超过300万高技能人才流向发达国家
+        - **全球化浪潮**：冷战结束后，资本、技术和人才的全球流动加速，形成了前所未有的全球一体化趋势
+        - **学术全球化**：英语成为学术通用语言，国际合作日益频繁，跨国研究团队成为常态
+        - **人才流失**：1990-2010年间，发展中国家有超过300万高技能人才流向发达国家，形成了所谓的“智力外流”
+        - **知识经济兴起**：知识和创新成为经济发展的核心驱动力，进一步加剧了对高技能人才的竞争
         """)
         
         st.markdown("""
@@ -738,4 +753,10 @@ elif page == "板块二：历史切片 (微观分析)":
         - [学术全球化研究](https://www.science.org/doi/10.1126/science.1219319) - 科学杂志关于学术全球化的研究
         - [发展中国家的人才流失](https://www.un.org/development/desa/dpad/publication/globalization-and-the-brain-drain/) - 联合国关于发展中国家人才流失的报告
         - [国际科研合作趋势](https://www.nature.com/articles/s41586-020-2744-3) - 自然杂志关于国际科研合作的研究
+        - [知识经济与全球竞争](https://www.worldbank.org/en/publication/wdr2019) - 世界银行关于知识经济的研究报告
+        
+        ### 相关历史照片
+        - [国际学术会议](https://www.science.org/content/images/2020/01/science-367-6473-406-inline.jpg) - 国际学术会议照片
+        - [全球科研合作](https://www.nature.com/static/img/nature-research/logo/logo--large.svg) - 国际科研合作示意图
+        - [发展中国家科研环境](https://www.worldbank.org/content/dam/photos/00-photos/Photo%20Library/BPL-238295-Developing-world-research.jpg) - 发展中国家科研环境照片
         """)
