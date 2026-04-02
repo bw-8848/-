@@ -455,7 +455,7 @@ elif page == "板块二：历史切片 (微观分析)":
                            title="战前 vs 战后获奖者年龄分布",
                            labels={'age': '获奖年龄', 'period': '时期'},
                            color_discrete_sequence=px.colors.qualitative.Pastel2)
-            fig_age.update_layout(height=400)
+            fig_age.update_layout(height=400, yaxis=dict(range=[20, 100]))
             st.plotly_chart(fig_age, use_container_width=True)
         else:
             st.info("暂无足够数据生成年龄分布箱线图")
@@ -700,7 +700,7 @@ elif page == "板块二：历史切片 (微观分析)":
                            title="1990年代至今获奖者年龄分布",
                            labels={'age': '获奖年龄', 'decade': '年代'},
                            color_discrete_sequence=px.colors.qualitative.Pastel2)
-            fig_age.update_layout(height=400)
+            fig_age.update_layout(height=400, yaxis=dict(range=[20, 100]))
             st.plotly_chart(fig_age, use_container_width=True)
         else:
             st.info("暂无足够数据生成年龄结构变化图")
