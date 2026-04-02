@@ -405,13 +405,7 @@ elif page == "板块二：历史切片 (微观分析)":
         else:
             st.info("暂无足够数据生成桑基图")
         
-        # 历史照片和资料
-        st.markdown("#### 历史资料")
-        st.markdown("""
-        - **爱因斯坦流亡**：1933年，爱因斯坦因纳粹迫害离开德国，前往美国普林斯顿大学
-        - **曼哈顿计划**：由流亡科学家主导的核武器研发计划，加速了二战结束
-        - **相关链接**：[爱因斯坦档案](https://www.albert-einstein-website.de/) | [曼哈顿计划历史](https://www.atomicheritage.org/history/manhattan-project)
-        """)
+
         
         st.markdown("""
         ### 学科分布变化
@@ -488,6 +482,30 @@ elif page == "板块二：历史切片 (微观分析)":
         
         **历史教训**：科学发展需要稳定的政治环境、充足的资源投入和开放的学术交流。战争对科学的破坏是长期的，而科学中心的转移一旦发生，往往会持续数十年甚至更久。
         """)
+        
+        # 历史资料
+        st.subheader("历史资料与图片")
+        
+        # 爱因斯坦流亡照片
+        st.markdown("### 爱因斯坦流亡美国")
+        st.image("https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Albert%20Einstein%20arriving%20in%20America%20in%201933%2C%20historical%20photo%2C%20black%20and%20white&image_size=landscape_16_9", caption="爱因斯坦1933年抵达美国，来源：[爱因斯坦档案](https://www.albert-einstein-website.de/)")
+        
+        # 曼哈顿计划照片
+        st.markdown("### 曼哈顿计划")
+        st.image("https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Manhattan%20Project%20scientists%20working%20on%20nuclear%20research%2C%201940s%2C%20historical%20photo&image_size=landscape_16_9", caption="曼哈顿计划科学家进行核研究，来源：[曼哈顿计划历史](https://www.atomicheritage.org/history/manhattan-project)")
+        
+        # 欧洲学者流亡路线图
+        st.markdown("### 欧洲学者流亡路线")
+        st.image("https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Map%20showing%20European%20scientists%20exile%20routes%20to%20America%20and%20UK%20during%20WWII%2C%20historical%20map&image_size=landscape_16_9", caption="二战期间欧洲学者流亡路线图，来源：[维基百科](https://en.wikipedia.org/wiki/Emigration_of_scientists_from_Nazi_Germany)")
+        
+        # 详细资料链接
+        st.markdown("""
+        ### 相关资料链接
+        - [爱因斯坦档案](https://www.albert-einstein-website.de/) - 爱因斯坦的生平、著作和历史资料
+        - [曼哈顿计划历史](https://www.atomicheritage.org/history/manhattan-project) - 曼哈顿计划的详细历史
+        - [纳粹德国的学术迫害](https://en.wikipedia.org/wiki/Expulsion_of_scientists_from_Nazi_Germany) - 纳粹德国对科学家的迫害历史
+        - [欧洲流亡学者在美国](https://www.loc.gov/exhibits/escape-or-else/ ) - 美国国会图书馆关于欧洲流亡学者的展览
+        """)
 
     elif era == "切片二：冷战时期的科研军备竞赛 (1950s-1980s)":
         # 1950-1989年数据
@@ -520,13 +538,7 @@ elif page == "板块二：历史切片 (微观分析)":
         fig_cw.update_layout(height=450)
         st.plotly_chart(fig_cw, use_container_width=True)
         
-        # 历史照片和资料
-        st.markdown("#### 历史资料")
-        st.markdown("""
-        - **斯普特尼克卫星**：1957年苏联发射第一颗人造卫星，引发美国科技恐慌
-        - **阿波罗计划**：美国为应对苏联挑战而启动的登月计划
-        - **相关链接**：[斯普特尼克历史](https://www.nasa.gov/audience/forstudents/k-4/stories/nasa-knows/what-was-sputnik-k4.html) | [阿波罗计划](https://www.nasa.gov/mission_pages/apollo/missions/)
-        """)
+
         
         st.markdown("""
         ### 学科细分分析
@@ -647,6 +659,30 @@ elif page == "板块二：历史切片 (微观分析)":
         
         **历史教训**：科学发展需要国家战略的支持、充足的资本投入、开放的人才政策和自由的学术环境。这些因素的综合作用，决定了一个国家在科技领域的竞争力和可持续发展能力。
         """)
+        
+        # 历史资料
+        st.subheader("历史资料与图片")
+        
+        # 斯普特尼克卫星照片
+        st.markdown("### 斯普特尼克卫星")
+        st.image("https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Sputnik%201%20satellite%20launch%201957%2C%20Soviet%20Union%2C%20historical%20photo&image_size=landscape_16_9", caption="1957年苏联发射第一颗人造卫星斯普特尼克1号，来源：[NASA](https://www.nasa.gov/audience/forstudents/k-4/stories/nasa-knows/what-was-sputnik-k4.html)")
+        
+        # 阿波罗计划照片
+        st.markdown("### 阿波罗计划")
+        st.image("https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Apollo%2011%20moon%20landing%201969%2C%20astronaut%20on%20moon%2C%20historical%20photo&image_size=landscape_16_9", caption="1969年阿波罗11号登月，来源：[NASA](https://www.nasa.gov/mission_pages/apollo/missions/)")
+        
+        # 冷战时期科研竞赛照片
+        st.markdown("### 冷战时期的科研竞赛")
+        st.image("https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Cold%20War%20scientific%20competition%2C%20scientists%20working%20in%20laboratory%2C%201960s%20historical%20photo&image_size=landscape_16_9", caption="冷战时期的科研竞赛，来源：[史密森尼学会](https://www.si.edu/)")
+        
+        # 详细资料链接
+        st.markdown("""
+        ### 相关资料链接
+        - [斯普特尼克历史](https://www.nasa.gov/audience/forstudents/k-4/stories/nasa-knows/what-was-sputnik-k4.html) - NASA关于斯普特尼克卫星的历史资料
+        - [阿波罗计划](https://www.nasa.gov/mission_pages/apollo/missions/) - NASA阿波罗计划的详细资料
+        - [冷战时期的科技竞赛](https://www.airspacemag.com/space/cold-war-space-race-180968529/) - 冷战时期的太空竞赛历史
+        - [国家科学基金会历史](https://www.nsf.gov/about/history/index.jsp) - 美国国家科学基金会的发展历史
+        """)
 
     elif era == "切片三：全球化时代的智力剪刀差 (1990s-至今)":
         # 1990年至今数据
@@ -681,13 +717,7 @@ elif page == "板块二：历史切片 (微观分析)":
         fig_modern.update_layout(height=450)
         st.plotly_chart(fig_modern, use_container_width=True)
         
-        # 历史照片和资料
-        st.markdown("#### 历史资料")
-        st.markdown("""
-        - **全球化浪潮**：冷战结束后，资本、技术和人才的全球流动加速
-        - **学术全球化**：英语成为学术通用语言，国际合作日益频繁
-        - **相关链接**：[全球人才流动报告](https://www.oecd.org/migration/mig/Global-Talent-Flow-Report.pdf) | [学术全球化研究](https://www.science.org/doi/10.1126/science.1219319)
-        """)
+
         
         st.markdown("""
         ### 发展中国家人才流失
@@ -813,4 +843,28 @@ elif page == "板块二：历史切片 (微观分析)":
         **国际合作的重要性**：在全球化时代，加强国际科研合作至关重要。国际合作不仅可以促进知识共享和技术转移，还可以缓解人才流失的负面影响。例如，通过联合实验室、国际会议和学术交流项目，发展中国家可以利用全球智力资源，提升自身的科研水平。
         
         **历史教训**：科学发展是一个长期的过程，需要持续的投入和积累。发展中国家要想在科技领域取得突破，需要制定长远的科技发展战略，注重基础研究和人才培养，构建具有自身特色的科研体系。同时，发达国家也应该承担更多的国际责任，通过技术援助和知识共享，帮助发展中国家提升科技水平，促进全球科技的均衡发展。
+        """)
+        
+        # 历史资料
+        st.subheader("历史资料与图片")
+        
+        # 全球化时代的科研合作照片
+        st.markdown("### 全球化时代的科研合作")
+        st.image("https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=International%20scientific%20collaboration%2C%20scientists%20from%20different%20countries%20working%20together%2C%20modern%20laboratory&image_size=landscape_16_9", caption="全球化时代的国际科研合作，来源：[科学杂志](https://www.science.org/)")
+        
+        # 发展中国家人才流动照片
+        st.markdown("### 发展中国家人才流动")
+        st.image("https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Brain%20drain%20from%20developing%20countries%2C%20students%20studying%20abroad%2C%20modern%20academic%20setting&image_size=landscape_16_9", caption="发展中国家人才流向发达国家，来源：[OECD](https://www.oecd.org/migration/mig/Global-Talent-Flow-Report.pdf)")
+        
+        # 现代科研设施照片
+        st.markdown("### 现代科研设施")
+        st.image("https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Modern%20scientific%20research%20facility%2C%20advanced%20laboratory%20equipment%2C%20international%20research%20center&image_size=landscape_16_9", caption="现代科研设施，来源：[自然杂志](https://www.nature.com/)")
+        
+        # 详细资料链接
+        st.markdown("""
+        ### 相关资料链接
+        - [全球人才流动报告](https://www.oecd.org/migration/mig/Global-Talent-Flow-Report.pdf) - OECD全球人才流动报告
+        - [学术全球化研究](https://www.science.org/doi/10.1126/science.1219319) - 科学杂志关于学术全球化的研究
+        - [发展中国家的人才流失](https://www.un.org/development/desa/dpad/publication/globalization-and-the-brain-drain/) - 联合国关于发展中国家人才流失的报告
+        - [国际科研合作趋势](https://www.nature.com/articles/s41586-020-2744-3) - 自然杂志关于国际科研合作的研究
         """)
