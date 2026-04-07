@@ -12,40 +12,90 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-# ==========================================
-# 0.5 页面样式自定义注入 (CSS 魔法)
+
+# 0.5 页面样式自定义注入 (终极 UI 升级版)
 # ==========================================
 hide_streamlit_style = """
 <style>
-    /* 1. 隐藏右上角默认的汉堡菜单 (防止最终用户看到部署选项) */
+    /* 1. 基础隐藏：去除无关元素 */
     #MainMenu {visibility: hidden;} 
-
-    /* 2. 隐藏底部的 "Made with Streamlit" 水印 */
     footer {visibility: hidden;} 
+    /* 安全隐藏顶部彩色条，同时保留侧边栏展开按钮 */
+    header {background: transparent !important;}
+    .stApp > header {background-color: transparent;}
 
-    /* 3. 隐藏页面最顶部的彩色装饰条 */
-    header {visibility: hidden;} 
-
-    /* 4. 核心：重构主容器的边距 */
+    /* 2. 核心布局：利用宽屏与优化边距 */
     .block-container {
-        padding-top: 2rem !important; /* 原本默认大概有 6rem 的顶部留白，大幅缩减，把空间还给图表 */
+        padding-top: 1.5rem !important; 
         padding-bottom: 2rem !important;
-        max-width: 95% !important; /* 强制拉宽内容区，利用好宽屏显示器 */
+        max-width: 95% !important; 
     }
 
-    /* 5. 优化 Tab 标签栏的视觉效果 */
+    /* 3. 字体质感升级：全局强制使用高级无衬线中文字体 */
+    html, body, [class*="css"] {
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+    }
+    h1, h2, h3 {
+        font-weight: 700 !important; /* 标题加粗，更具力量感 */
+        color: #111827 !important; /* 标题颜色采用极深灰而非纯黑，更护眼 */
+    }
+
+    /* 4. Tab 标签栏的视觉效果升级 */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 10px; /* 控制标签之间的间距 */
+        gap: 15px; 
+        border-bottom: 2px solid #E5E7EB; /* 底部加一条细线，显得更规整 */
     }
     .stTabs [data-baseweb="tab"] {
-        height: 50px;
+        height: 55px;
         white-space: pre-wrap;
         background-color: transparent;
-        border-radius: 4px 4px 0px 0px;
-        font-weight: 600; /* 加粗标签字体 */
+        font-weight: 600; 
+        font-size: 1.1rem; /* Tab 字体稍微放大 */
+        color: #6B7280; /* 未选中时为低调灰色 */
+    }
+    /* 选中时的 Tab 颜色（匹配你的学术蓝主题） */
+    .stTabs [aria-selected="true"] {
+        color: #1A237E !important; 
+        border-bottom-color: #1A237E !important;
+    }
+
+    /* 5. 🌟 核心排版提升：让 KPI 指标卡 (st.metric) 变成精致卡片 */
+    div[data-testid="metric-container"] {
+        background-color: #ffffff;
+        border: 1px solid #E5E7EB;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    /* 鼠标悬浮在指标卡上时的微动效 */
+    div[data-testid="metric-container"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    }
+
+    /* 6. 侧边栏导航美化 (弱化单选框感，强化菜单感) */
+    [data-testid="stSidebar"] div[role="radiogroup"] > label {
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        background-color: transparent;
+        transition: background-color 0.2s ease;
+    }
+    /* 侧边栏选项悬浮背景色 */
+    [data-testid="stSidebar"] div[role="radiogroup"] > label:hover {
+        background-color: rgba(26, 35, 126, 0.05); /* 极淡的学术蓝背景 */
+    }
+
+    /* 7. 多选框(multiselect)标签学术蓝护城河 */
+    span[data-baseweb="tag"] {
+        background-color: #1A237E !important; 
     }
 </style>
 """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+# ⚠️ 确保你的代码里有下面这一行，CSS 才会真正生效！
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # ==========================================
 # 1. 数据加载与核心清洗模块
@@ -79,7 +129,7 @@ page = st.sidebar.radio(
 )
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 👨‍💻 战队信息\n**数字人文作业系统数据项目**\n\n以数据洞察历史，用技术重塑人文。")
+st.sidebar.markdown("### 👨‍💻 战队信息\n**数字人文作业系统数据项目**\n\n组员：卢泓凯 刘届简 马铭")
 
 # ==========================================
 # 3. 页面一逻辑：全景诺奖 (宏观探索)
@@ -96,7 +146,7 @@ if page == "板块一：全景诺奖 (宏观探索)":
     ])
 
     with tab1:
-        st.subheader("诺贝尔奖地域跨国迁移地图 (飞线流量图 - 高级交互版)")
+        st.subheader("诺贝尔奖地域跨国迁移地图")
 
         # --- 1. 数据准备与人名聚合 (保留旧逻辑) ---
         map_df = df[(df['bornCountry_now'] != 'Unknown') &
@@ -199,7 +249,6 @@ if page == "板块一：全景诺奖 (宏观探索)":
                 showlegend=False,
                 hoverinfo='none'
             ))
-
         # --- C. 层 3：飞线连线 (Lines) ---
         for _, row in flow_data.iterrows():
             born = row['bornCountry_now']
@@ -280,7 +329,6 @@ if page == "板块一：全景诺奖 (宏观探索)":
         st.subheader("📈 百年科研重心：从自然科学到交叉学科的演进")
 
         # --- 1. 核心指标卡 (KPI) ---
-        # 在趋势图上方先展示核心结论
         kpi_c1, kpi_c2, kpi_c3 = st.columns(3)
         kpi_c1.metric("累计奖项总数", f"{len(df)} 项", "↑ 逐年增长")
         kpi_c2.metric("产出最丰学科", df['category'].value_counts().idxmax())
@@ -288,102 +336,168 @@ if page == "板块一：全景诺奖 (宏观探索)":
 
         st.markdown("---")
 
-        # --- 2. 左右双栏布局 ---
-        col_left, col_right = st.columns([7, 3])
-
+        # ==========================================
+        # 上半部分：全宽展示面积趋势图
+        # ==========================================
         # 数据准备
         trend_df = df.groupby(['year', 'category']).size().reset_index(name='count')
         all_years = pd.DataFrame({'year': range(df['year'].min(), df['year'].max() + 1)})
         trend_df = pd.merge(all_years, trend_df, on='year', how='left').fillna({'count': 0})
 
-        with col_left:
-            # --- 3. 优化后的面积图 ---
-            fig_area = px.area(
-                trend_df, x="year", y="count", color="category",
-                line_shape='spline',  # 让曲线平滑，告别生硬折线
-                title="历年各学科获奖强度演变",
-                labels={"count": "获奖人数", "year": "年份", "category": "学科领域"},
-                template="plotly_white",  # 强制适配白底主题
-                color_discrete_sequence=px.colors.qualitative.Safe  # 使用更稳重优雅的色板
-            )
+        # 绘制优化后的面积图
+        fig_area = px.area(
+            trend_df, x="year", y="count", color="category",
+            line_shape='spline',
+            title="百年各学科获奖强度演变",
+            labels={"count": "获奖人数", "year": "年份", "category": "学科领域"},
+            template="plotly_white",
+            color_discrete_sequence=px.colors.qualitative.Safe
+        )
 
-            # 添加历史背景阴影：一战与二战 (人文深度体现)
-            fig_area.add_vrect(x0=1914, x1=1918, fillcolor="gray", opacity=0.1, line_width=0, annotation_text="一战",
-                               annotation_position="top left")
-            fig_area.add_vrect(x0=1939, x1=1945, fillcolor="gray", opacity=0.1, line_width=0, annotation_text="二战",
-                               annotation_position="top left")
+        # 添加历史背景阴影
+        fig_area.add_vrect(x0=1914, x1=1918, fillcolor="gray", opacity=0.1, line_width=0, annotation_text="一战",
+                           annotation_position="top left")
+        fig_area.add_vrect(x0=1939, x1=1945, fillcolor="gray", opacity=0.1, line_width=0, annotation_text="二战",
+                           annotation_position="top left")
 
-            fig_area.update_layout(
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                margin=dict(l=0, r=0, t=50, b=0)
-            )
-            st.plotly_chart(fig_area, use_container_width=True)
+        fig_area.update_layout(
+            height=500,  # 占据一整行，高度适中
+            legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5),
+            margin=dict(l=0, r=0, t=50, b=50)
+        )
+        # 独占一行渲染
+        st.plotly_chart(fig_area, width="stretch")
 
-        with col_right:
-            # --- 4. 结构占比环形图 ---
-            st.write("#### 学科权力结构")
+        st.markdown("---")  # 优雅的分割线
+
+        # ==========================================
+        # 下半部分：双栏布局 (黄金分割：环形图 + 文字洞察)
+        # ==========================================
+        # 使用 4:6 的近似黄金分割比例
+        col_donut, col_insight = st.columns([4, 6], gap="large")
+
+        with col_donut:
+            # 结构占比环形图
             cat_counts = df['category'].value_counts().reset_index()
             fig_pie = px.pie(
                 cat_counts, values='count', names='category',
-                hole=0.5,  # 变成环形图，更高级
+                hole=0.5,
+                title="百年学科权力结构",
                 color_discrete_sequence=px.colors.qualitative.Safe,
                 template="plotly_white"
             )
-            fig_pie.update_layout(showlegend=False, margin=dict(l=0, r=0, t=0, b=0))
-            # 在中间显示总数
-            fig_pie.add_annotation(text="各学科<br>总占比", showarrow=False, font_size=14)
-            st.plotly_chart(fig_pie, use_container_width=True)
 
-        # --- 5. 底部文本分析 ---
-        st.info(
-            "💡 **数字人文洞察**：从 20 世纪初的物理、化学‘双雄鼎立’，到 21 世纪以来生理学或医学奖的异军突起，反映了人类科研范式从‘物质本质探索’向‘生命健康与复杂系统’的重大转向。灰阴影区显示战争期间科学奖励的停滞，揭示了科研与地缘政治的共生关系。")
+            fig_pie.update_traces(
+                textinfo='percent+label',
+                textposition='outside',
+                marker=dict(line=dict(color='#FFFFFF', width=2))
+            )
+
+            fig_pie.update_layout(
+                height=380,  # 高度稍微收敛，配合右侧文字框的高度
+                showlegend=False,
+                margin=dict(l=20, r=20, t=50, b=20),
+                annotations=[dict(text="各学科<br>总占比", x=0.5, y=0.5, font_size=16, showarrow=False)]
+            )
+            st.plotly_chart(fig_pie, width="stretch")
+
+        with col_insight:
+            st.markdown("<br><br>", unsafe_allow_html=True)  # 使用空行把文字框往下推一点，实现视觉居中
+            st.info(
+                "💡 **数字人文洞察**：\n\n"
+                "**1. 基础科学的世纪交替**：从上方的全宽趋势图中可以清晰看到，20 世纪上半叶是物理学与化学的“双雄时代”；而进入 21 世纪后，生理学或医学奖（黄色色块）异军突起，占据了越来越大的波峰。这反映了人类科研范式从“探求物质本质”向“探索生命健康与复杂系统”的重大转向。\n\n"
+                "**2. 战争的“静默期”**：时间轴上的灰色阴影区直观地展示了两次世界大战期间科学奖励的停滞甚至断崖式下跌，深刻揭示了最高层级的基础科研与地缘政治休戚与共的共生关系。"
+            )
 
     with tab3:
         st.subheader("得奖者的群体特征：年龄趋势与性别比例")
 
-        # 将页面分为左右两栏
-        col_age, col_gender = st.columns([6, 4])
+        # ==========================================
+        # 上半部分：全宽展示年龄趋势
+        # ==========================================
+        # --- 1. 数据清洗 ---
+        clean_age_df = df.dropna(subset=['age', 'category']).copy()
+        clean_age_df = clean_age_df[(clean_age_df['age'] >= 20) & (clean_age_df['age'] <= 100)]
 
-        with col_age:
-            # --- 散点图及趋势拟合线 ---
-            age_df = df.dropna(subset=['age', 'category'])
-            fig_scatter = px.scatter(age_df, x="year", y="age", color="category",
-                                     hover_data=['name', 'institutionCountry'],
-                                     opacity=0.7,
-                                     title="百年来诺奖得主获奖年龄分布",
-                                     labels={"age": "获奖时年龄", "year": "年份", "category": "学科"},
-                                     template="plotly_white")
+        # --- 2. 计算 10 年滚动平均年龄 ---
+        yearly_age = clean_age_df.groupby(['year', 'category'])['age'].mean().reset_index()
+        yearly_age['rolling_age'] = yearly_age.groupby('category')['age'].transform(
+            lambda x: x.rolling(10, min_periods=1).mean())
 
-            avg_age_per_decade = age_df.groupby([age_df['year'] // 10 * 10, 'category'])['age'].mean().reset_index()
-            fig_scatter.add_traces(px.line(avg_age_per_decade, x="year", y="age", color="category").data)
+        # --- 3. 绘制平滑折线图 ---
+        fig_line = px.line(
+            yearly_age,
+            x="year",
+            y="rolling_age",
+            color="category",
+            line_shape='spline',
+            title="百年诺奖得主平均年龄的演变 (10年滚动趋势)",
+            labels={"rolling_age": "平均年龄 (10年滚动均值)", "year": "年份", "category": "学科"},
+            template="plotly_white",
+            color_discrete_sequence=px.colors.qualitative.Safe
+        )
 
-            for trace in fig_scatter.data:
-                if trace.mode == 'lines':
-                    trace.line.dash = 'dash'
+        fig_line.update_traces(line=dict(width=3))
+        fig_line.update_layout(
+            height=500,  # 高度适中，避免占据过多首屏空间
+            legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5),
+            margin=dict(l=0, r=0, t=50, b=50),
+            yaxis=dict(range=[45, 75])
+        )
+        # 独占一行，直接渲染
+        st.plotly_chart(fig_line, width="stretch")
 
-            st.plotly_chart(fig_scatter, use_container_width=True)
+        st.markdown("---")  # 添加一条淡淡的分割线，增加层次感
+
+        # ==========================================
+        # 下半部分：双栏布局 (图表 + 解读)
+        # ==========================================
+        col_gender, col_insight = st.columns([4, 6], gap="large")
 
         with col_gender:
-            # --- 南丁格尔玫瑰图 (性别比例) ---
+            # --- 直观的环形图 (Donut Chart) ---
             gender_df = df.dropna(subset=['gender'])
             gender_counts = gender_df['gender'].value_counts().reset_index()
             gender_counts.columns = ['gender', 'count']
 
-            # 翻译性别标签
             gender_counts['gender'] = gender_counts['gender'].map(
-                {'male': '男性 (Male)', 'female': '女性 (Female)'}).fillna(gender_counts['gender'])
+                {'male': '男性', 'female': '女性'}).fillna(gender_counts['gender'])
 
-            fig_rose = px.bar_polar(gender_counts, r="count", theta="gender",
-                                    color="gender", template="plotly_white",
-                                    title="诺奖得主性别比例",
-                                    color_discrete_map={'男性 (Male)': '#636EFA', '女性 (Female)': '#EF553B'})
+            fig_gender = px.pie(
+                gender_counts,
+                values="count",
+                names="gender",
+                color="gender",
+                template="plotly_white",
+                title="诺奖得主性别比例",
+                hole=0.6,
+                color_discrete_map={'男性': '#1A237E', '女性': '#E65100'}
+            )
 
-            fig_rose.update_layout(polar=dict(radialaxis=dict(visible=True, showticklabels=True)))
-            st.plotly_chart(fig_rose, use_container_width=True)
+            fig_gender.update_traces(
+                textinfo='percent+label',
+                textposition='outside',
+                hovertemplate="%{label}: %{value}人<extra></extra>",
+                marker=dict(line=dict(color='#FFFFFF', width=2))
+            )
 
+            fig_gender.update_layout(
+                height=350,  # 高度稍微收敛，配合文字框的高度
+                showlegend=False,
+                margin=dict(l=20, r=20, t=50, b=20),
+                annotations=[dict(text=f"总计<br><b>{gender_counts['count'].sum()}</b> 人", x=0.5, y=0.5, font_size=16,
+                                  showarrow=False)]
+            )
+            st.plotly_chart(fig_gender, width="stretch")
+
+        with col_insight:
+            # 使用 html 换行让文本框垂直方向稍微居中，视觉更平衡
+            st.markdown("<br><br>", unsafe_allow_html=True)
             st.info(
-                "💡 **分析洞察：**\n自然科学领域存在明显的获奖者“老龄化”趋势（基础科学突破需要更长时间的积累）；而右侧玫瑰图则极其直观地揭示了百年来顶尖科研群体中女性科学家比例的演变及巨大悬殊。")
-
+                "💡 **分析洞察：**\n\n"
+                "**1. 越发漫长的科研长跑：** 观察上方的平滑曲线可以发现，自20世纪中叶以来，物理学和化学等基础自然科学领域的获奖者平均年龄呈现出明显的“老龄化”爬坡趋势（从平均50多岁一路上升至近70岁）。这反映了现代基础科学的理论突破愈发艰难，需要更长时间的知识积累与跨学科融合。\n\n"
+                "**2. 巨大的性别剪刀差：** 左侧的环形图则以直截了当的方式，揭示了百年来顶尖科研群体中极度悬殊的性别比例（女性占比仅约 5%）。尽管近年来有所改善，但“漏管效应（Leaky Pipeline）”在顶级科研金字塔尖依然严峻。"
+            )
     with tab4:
         st.subheader("权力与资本的聚集：“学术寡头”矩形树图")
 
@@ -449,7 +563,7 @@ if page == "板块一：全景诺奖 (宏观探索)":
                 path=[px.Constant("全球顶级科研机构"), 'continent', 'institutionCountry', 'institutionName'],
                 values='count',  # 区块大小 = 获奖人数
                 color='latest_year',  # 区块颜色 = 最近一次获奖的年份
-                color_continuous_scale=px.colors.sequential.OrRd, # 色板：从灰暗 (古老) 到鲜红 (近期)
+                color_continuous_scale=px.colors.sequential.Blues,  # 🔵 替换为经典的学术深蓝渐变
                 template="plotly_dark",
             )
 
