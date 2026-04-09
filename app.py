@@ -782,15 +782,15 @@ elif page == "板块二：历史切片 (微观分析)":
 
         # 爱因斯坦照片
         st.markdown("### 爱因斯坦与同事")
-        st.image("https://i.postimg.cc/05tSxH2V/einstein.jpg", caption="爱因斯坦与同事在一起，来源：[爱因斯坦档案](https://www.albert-einstein-website.de/)")
+        st.image("images/einstein.jpg", caption="爱因斯坦与同事在一起，来源：[爱因斯坦档案](https://www.albert-einstein-website.de/)")
 
         # 曼哈顿计划标志
         st.markdown("### 曼哈顿计划")
-        st.image("https://i.postimg.cc/2j19Z7q5/manhattan-project.png", caption="曼哈顿计划标志，来源：[曼哈顿计划历史](https://www.atomicheritage.org/history/manhattan-project)")
+        st.image("images/manhattan_project.png", caption="曼哈顿计划标志，来源：[曼哈顿计划历史](https://www.atomicheritage.org/history/manhattan-project)")
 
         # 欧洲学者流亡路线图
         st.markdown("### 欧洲学者流亡路线")
-        st.image("https://i.postimg.cc/c4QjK0d6/exile-routes.jpg", caption="二战期间欧洲学者流亡路线图，来源：[维基百科](https://en.wikipedia.org/wiki/Emigration_of_scientists_from_Nazi_Germany)")
+        st.image("images/exile_routes.jpg", caption="二战期间欧洲学者流亡路线图，来源：[维基百科](https://en.wikipedia.org/wiki/Emigration_of_scientists_from_Nazi_Germany)")
 
         # 详细资料链接
         st.markdown("""
@@ -962,11 +962,11 @@ elif page == "板块二：历史切片 (微观分析)":
 
         # 阿波罗计划标志
         st.markdown("### 阿波罗计划")
-        st.image("https://i.postimg.cc/76qBvQkK/apollo-logo.png", caption="阿波罗计划标志，来源：[NASA](https://www.nasa.gov/mission_pages/apollo/missions/)")
+        st.image("images/apollo_logo.png", caption="阿波罗计划标志，来源：[NASA](https://www.nasa.gov/mission_pages/apollo/missions/)")
 
         # 斯普特尼克卫星
         st.markdown("### 斯普特尼克卫星")
-        st.image("https://i.postimg.cc/5y4X3zFf/sputnik.jpg", caption="斯普特尼克卫星，来源：[NASA](https://www.nasa.gov/audience/forstudents/k-4/stories/nasa-knows/what-was-sputnik-k4.html)")
+        st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/First_Sputnik.png/800px-First_Sputnik.png", caption="斯普特尼克卫星，来源：[维基百科](https://en.wikipedia.org/wiki/Sputnik_1)")
 
         # 详细资料链接
         st.markdown("""
