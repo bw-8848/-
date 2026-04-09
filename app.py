@@ -125,9 +125,12 @@ df = load_and_clean_data()
 st.sidebar.title("🧭 导航菜单")
 page = st.sidebar.radio(
     "页面选择",
-    ["板块一：全景诺奖 (宏观探索)", "板块二：历史切片 (微观分析)"]
+    [
+        "板块一：全景诺奖 (宏观探索)",
+        "板块二：历史切片 (微观分析)",
+        "板块三：AI 诺奖学术助手"  # <-- 新增这一行
+    ]
 )
-
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 👨‍💻 战队信息\n**数字人文作业系统数据项目**\n\n组员：卢泓凯 刘届简 马铭")
 
@@ -1181,3 +1184,84 @@ elif page == "板块二：历史切片 (微观分析)":
         - [发展中国家的人才流失](https://www.un.org/development/desa/dpad/publication/globalization-and-the-brain-drain/) - 联合国关于发展中国家人才流失的报告
         - [国际科研合作趋势](https://www.nature.com/articles/s41586-020-2744-3) - 自然杂志关于国际科研合作的研究
         """)
+# ==========================================
+# 5. 页面三逻辑：AI 诺奖学术助手 (DeepSeek API 高并发版)
+# ==========================================
+elif page == "板块三：AI 诺奖学术助手":
+    st.title("🤖 诺奖学术助手：与历史数据对话")
+    st.info("💡 这是一个由 DeepSeek 强力驱动的专属学术助手，你可以询问关于诺贝尔奖的历史趋势、学者迁徙背景或地缘政治分析。")
+    st.markdown("---")
+
+    from openai import OpenAI
+
+    # 1. 安全获取 API Key
+    try:
+        # 记得在项目根目录创建 .streamlit/secrets.toml 文件并写入 DEEPSEEK_API_KEY = "你的密钥"
+        api_key = st.secrets["DEEPSEEK_API_KEY"]
+    except Exception:
+        st.warning("⚠️ 未检测到 API Key。请在本地新建 .streamlit/secrets.toml 文件并配置密钥。")
+        st.stop()
+
+    # 2. 初始化 OpenAI 客户端 (指向 DeepSeek 的接口)
+    client = OpenAI(
+        api_key=api_key,
+        base_url="https://api.deepseek.com"  # DeepSeek 官方 API 地址
+    )
+
+    # 3. 初始化会话状态，用于存储历史对话记录
+    if "messages" not in st.session_state:
+        # 植入强大的系统提示词，定义 AI 的行为规范，防止它胡说八道
+        st.session_state.messages = [
+            {"role": "system", "content": """
+            你是一个名为“智汇何方”的数字人文项目的专属 AI 学术助手。
+            你的专业领域是：诺贝尔奖的历史数据、顶尖学者的跨国迁徙（如二战流亡、冷战人才竞争、全球化智力流失）以及背后的地缘政治因素。
+            你的回答应该：
+            1. 专业、客观、逻辑严密。
+            2. 语言简练，重点突出，适合在网页中快速阅读。
+            3. 遇到超出你知识储备的具体学者数据时，诚实回答，绝不编造。
+            """}
+        ]
+
+    # 4. 渲染历史聊天记录 (跳过系统提示词不显示)
+    for msg in st.session_state.messages:
+        if msg["role"] != "system":
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
+    # 5. 处理用户输入
+    if prompt := st.chat_input("在此输入您的问题，例如：简述二战时期欧洲科学家流亡美国的历史背景？"):
+        # 将用户消息显示在界面并加入历史记录
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        st.session_state.messages.append({"role": "user", "content": prompt})
+
+        # 显示 AI 正在思考的状态，并使用流式输出 (打字机效果)
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
+
+            try:
+                # 调用 DeepSeek API
+                response = client.chat.completions.create(
+                    model="deepseek-chat",
+                    messages=st.session_state.messages,
+                    stream=True,  # 开启流式输出，提升用户体验
+                    temperature=0.3,  # 稍微调低温度，让学术回答更严谨
+                )
+
+                # 接收流式数据块
+                for chunk in response:
+                    if chunk.choices[0].delta.content is not None:
+                        full_response += chunk.choices[0].delta.content
+                        message_placeholder.markdown(full_response + "▌")
+
+                # 渲染最终完整的回复
+                message_placeholder.markdown(full_response)
+
+            except Exception as e:
+                error_msg = f"API 调用出现异常。错误详情: {e}"
+                st.error(error_msg)
+                full_response = "抱歉，由于网络波动，当前无法提供服务，请稍后再试。"
+
+        # 将 AI 的回复存入上下文，以便支持多轮连续对话
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
