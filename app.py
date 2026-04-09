@@ -778,25 +778,7 @@ elif page == "板块二：历史切片 (微观分析)":
         """)
 
         # 历史资料
-        st.subheader("历史资料与图片")
-
-        # 爱因斯坦流亡照片
-        st.markdown("### 爱因斯坦流亡美国")
-        st.image(
-            "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Albert%20Einstein%20arriving%20in%20America%20in%201933%2C%20historical%20photo%2C%20black%20and%20white&image_size=landscape_16_9",
-            caption="爱因斯坦1933年抵达美国，来源：[爱因斯坦档案](https://www.albert-einstein-website.de/)")
-
-        # 曼哈顿计划照片
-        st.markdown("### 曼哈顿计划")
-        st.image(
-            "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Manhattan%20Project%20scientists%20working%20on%20nuclear%20research%2C%201940s%2C%20historical%20photo&image_size=landscape_16_9",
-            caption="曼哈顿计划科学家进行核研究，来源：[曼哈顿计划历史](https://www.atomicheritage.org/history/manhattan-project)")
-
-        # 欧洲学者流亡路线图
-        st.markdown("### 欧洲学者流亡路线")
-        st.image(
-            "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Map%20showing%20European%20scientists%20exile%20routes%20to%20America%20and%20UK%20during%20WWII%2C%20historical%20map&image_size=landscape_16_9",
-            caption="二战期间欧洲学者流亡路线图，来源：[维基百科](https://en.wikipedia.org/wiki/Emigration_of_scientists_from_Nazi_Germany)")
+        st.subheader("历史资料")
 
         # 详细资料链接
         st.markdown("""
@@ -964,25 +946,7 @@ elif page == "板块二：历史切片 (微观分析)":
         """)
 
         # 历史资料
-        st.subheader("历史资料与图片")
-
-        # 斯普特尼克卫星照片
-        st.markdown("### 斯普特尼克卫星")
-        st.image(
-            "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Sputnik%201%20satellite%20launch%201957%2C%20Soviet%20Union%2C%20historical%20photo&image_size=landscape_16_9",
-            caption="1957年苏联发射第一颗人造卫星斯普特尼克1号，来源：[NASA](https://www.nasa.gov/audience/forstudents/k-4/stories/nasa-knows/what-was-sputnik-k4.html)")
-
-        # 阿波罗计划照片
-        st.markdown("### 阿波罗计划")
-        st.image(
-            "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Apollo%2011%20moon%20landing%201969%2C%20astronaut%20on%20moon%2C%20historical%20photo&image_size=landscape_16_9",
-            caption="1969年阿波罗11号登月，来源：[NASA](https://www.nasa.gov/mission_pages/apollo/missions/)")
-
-        # 冷战时期科研竞赛照片
-        st.markdown("### 冷战时期的科研竞赛")
-        st.image(
-            "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Cold%20War%20scientific%20competition%2C%20scientists%20working%20in%20laboratory%2C%201960s%20historical%20photo&image_size=landscape_16_9",
-            caption="冷战时期的科研竞赛，来源：[史密森尼学会](https://www.si.edu/)")
+        st.subheader("历史资料")
 
         # 详细资料链接
         st.markdown("""
@@ -1156,25 +1120,7 @@ elif page == "板块二：历史切片 (微观分析)":
         """)
 
         # 历史资料
-        st.subheader("历史资料与图片")
-
-        # 全球化时代的科研合作照片
-        st.markdown("### 全球化时代的科研合作")
-        st.image(
-            "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=International%20scientific%20collaboration%2C%20scientists%20from%20different%20countries%20working%20together%2C%20modern%20laboratory&image_size=landscape_16_9",
-            caption="全球化时代的国际科研合作，来源：[科学杂志](https://www.science.org/)")
-
-        # 发展中国家人才流动照片
-        st.markdown("### 发展中国家人才流动")
-        st.image(
-            "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Brain%20drain%20from%20developing%20countries%2C%20students%20studying%20abroad%2C%20modern%20academic%20setting&image_size=landscape_16_9",
-            caption="发展中国家人才流向发达国家，来源：[OECD](https://www.oecd.org/migration/mig/Global-Talent-Flow-Report.pdf)")
-
-        # 现代科研设施照片
-        st.markdown("### 现代科研设施")
-        st.image(
-            "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Modern%20scientific%20research%20facility%2C%20advanced%20laboratory%20equipment%2C%20international%20research%20center&image_size=landscape_16_9",
-            caption="现代科研设施，来源：[自然杂志](https://www.nature.com/)")
+        st.subheader("历史资料")
 
         # 详细资料链接
         st.markdown("""
